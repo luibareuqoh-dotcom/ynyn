@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MuslimForever - Find Your Perfect Muslim Life Partner</title>
+  <meta name="description" content="MuslimForever - Trusted Muslim matrimony platform. Find your perfect halal match.">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="supabase.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f0eb; color: #1a1a2e; }
+    body.dark { background: #0f1724; color: #eef2ff; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    .navbar { background: white; padding: 12px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+    body.dark .navbar { background: #1a2533; }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    .logo { font-size: 1.5rem; font-weight: 800; color: #1a5c3a; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    body.dark .logo { color: #c8a96e; }
+    .logo .star { color: #c8a96e; }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+    .nav-links a { text-decoration: none; color: #333; font-weight: 500; transition: 0.2s; font-size: 0.95rem; }
+    body.dark .nav-links a { color: #eef2ff; }
+    .nav-links a:hover { color: #1a5c3a; }
+    body.dark .nav-links a:hover { color: #c8a96e; }
+    .nav-btn { padding: 8px 20px; border-radius: 25px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-block; }
+    .btn-login { background: transparent; color: #1a5c3a; border: 2px solid #1a5c3a; }
+    body.dark .btn-login { color: #c8a96e; border-color: #c8a96e; }
+    .btn-login:hover { background: #1a5c3a; color: white; }
+    body.dark .btn-login:hover { background: #c8a96e; color: #1a1a2e; }
+    .btn-register-nav { background: #1a5c3a; color: white; }
+    body.dark .btn-register-nav { background: #c8a96e; color: #1a1a2e; }
+    .btn-register-nav:hover { background: #0d4028; transform: scale(1.02); }
+    body.dark .btn-register-nav:hover { background: #dbb97e; }
+    .btn-dashboard-nav { background: #c8a96e; color: #1a1a2e; }
+    body.dark .btn-dashboard-nav { background: #1a5c3a; color: white; }
+    .btn-dashboard-nav:hover { background: #dbb97e; transform: scale(1.02); }
+    body.dark .btn-dashboard-nav:hover { background: #2a7a4a; }
+    .menu-icon { display: none; font-size: 1.5rem; cursor: pointer; color: #333; }
+    body.dark .menu-icon { color: white; }
+
+    .hero-section { background: linear-gradient(135deg, #0a2e1a 0%, #1a5c3a 50%, #0d4028 100%); padding: 4rem 0; position: relative; overflow: hidden; }
+    .hero-section::before { content: '☪'; position: absolute; font-size: 400px; opacity: 0.03; top: -100px; right: -50px; color: #c8a96e; transform: rotate(15deg); }
+    .hero-section .container { position: relative; z-index: 2; }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .hero-content h1 { font-size: 3rem; font-weight: 800; color: white; line-height: 1.2; }
+    .hero-content h1 .highlight { color: #c8a96e; }
+    .hero-content .subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.8); line-height: 1.6; margin: 1rem 0; }
+    .hero-features { display: flex; gap: 2rem; margin: 1.5rem 0; }
+    .hero-feature { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.85); font-size: 0.9rem; }
+    .hero-feature .icon { font-size: 1.2rem; }
+    .hero-form { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    body.dark .hero-form { background: #1a2533; }
+    .hero-form .form-title { font-size: 1.2rem; font-weight: 700; color: #1a5c3a; margin-bottom: 1.5rem; text-align: center; }
+    body.dark .hero-form .form-title { color: #c8a96e; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-weight: 600; font-size: 0.85rem; color: #555; margin-bottom: 4px; }
+    body.dark .form-group label { color: #aaa; }
+    .form-group select, .form-group input { width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.95rem; background: white; transition: 0.2s; color: #333; }
+    body.dark .form-group select, body.dark .form-group input { background: #2a3545; border-color: #3d4a5a; color: white; }
+    .form-group select:focus, .form-group input:focus { outline: none; border-color: #1a5c3a; }
+    body.dark .form-group select:focus, body.dark .form-group input:focus { border-color: #c8a96e; }
+    .btn-get-started { width: 100%; padding: 12px; background: #1a5c3a; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 0.5rem; }
+    body.dark .btn-get-started { background: #c8a96e; color: #1a1a2e; }
+    .btn-get-started:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(26, 92, 58, 0.3); }
+    body.dark .btn-get-started:hover { box-shadow: 0 8px 25px rgba(200, 169, 110, 0.3); }
+    .hero-form .trust-badge { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1rem; font-size: 0.8rem; color: #888; }
+    body.dark .hero-form .trust-badge { color: #aaa; }
+    .hero-form .trust-badge .check { color: #1a5c3a; font-weight: 700; }
+    body.dark .hero-form .trust-badge .check { color: #c8a96e; }
+
+    .stats-section { background: white; padding: 3rem 0; border-bottom: 1px solid #eee; }
+    body.dark .stats-section { background: #1a2533; border-color: #2d3a4a; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; text-align: center; }
+    .stat-item .number { font-size: 2.5rem; font-weight: 800; color: #1a5c3a; }
+    body.dark .stat-item .number { color: #c8a96e; }
+    .stat-item .label { color: #888; font-size: 0.9rem; margin-top: 5px; }
+    body.dark .stat-item .label { color: #aaa; }
+
+    .profiles-section { padding: 4rem 0; background: #f5f0eb; }
+    body.dark .profiles-section { background: #0f1724; }
+    .section-title { text-align: center; font-size: 2rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
+    body.dark .section-title { color: white; }
+    .section-title .highlight { color: #1a5c3a; }
+    body.dark .section-title .highlight { color: #c8a96e; }
+    .section-subtitle { text-align: center; color: #888; font-size: 1rem; margin-bottom: 2rem; }
+    body.dark .section-subtitle { color: #aaa; }
+    .profiles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2rem; }
+    .profile-card { background: white; border-radius: 20px; padding: 1.5rem; text-align: center; box-shadow: 0 5px 30px rgba(0,0,0,0.05); transition: 0.3s; border: 1px solid #eee; }
+    body.dark .profile-card { background: #1a2533; border-color: #2d3a4a; }
+    .profile-card:hover { transform: translateY(-5px); box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+    .profile-card .profile-image { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #c8a96e; margin: 0 auto 1rem; display: block; }
+    .profile-card .profile-name { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; }
+    body.dark .profile-card .profile-name { color: white; }
+    .profile-card .profile-detail { color: #888; font-size: 0.9rem; margin: 4px 0; }
+    body.dark .profile-card .profile-detail { color: #aaa; }
+    .profile-card .profile-badge { display: inline-block; background: rgba(26, 92, 58, 0.1); color: #1a5c3a; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; margin: 3px; }
+    body.dark .profile-card .profile-badge { background: rgba(200, 169, 110, 0.2); color: #c8a96e; }
+    .profile-card .view-btn { display: block; margin-top: 12px; padding: 8px; border: 2px solid #1a5c3a; color: #1a5c3a; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
+    body.dark .profile-card .view-btn { border-color: #c8a96e; color: #c8a96e; }
+    .profile-card .view-btn:hover { background: #1a5c3a; color: white; }
+    body.dark .profile-card .view-btn:hover { background: #c8a96e; color: #1a1a2e; }
+
+    .skeleton-card { background: linear-gradient(90deg, #e0e7ef 25%, #f0f5fa 50%, #e0e7ef 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 20px; height: 300px; }
+    body.dark .skeleton-card { background: linear-gradient(90deg, #1a2533 25%, #2a3545 50%, #1a2533 75%); }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .stories-section { padding: 4rem 0; background: white; }
+    body.dark .stories-section { background: #1a2533; }
+    .stories-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+    .story-card { background: #f5f0eb; border-radius: 20px; padding: 2rem; text-align: center; transition: 0.3s; }
+    body.dark .story-card { background: #0f1724; }
+    .story-card:hover { transform: translateY(-5px); }
+    .story-card .couple-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .story-card .couple-name { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; }
+    body.dark .story-card .couple-name { color: white; }
+    .story-card .couple-location { color: #888; font-size: 0.85rem; }
+    body.dark .story-card .couple-location { color: #aaa; }
+    .story-card .testimonial { color: #555; font-size: 0.9rem; line-height: 1.6; margin: 1rem 0; font-style: italic; }
+    body.dark .story-card .testimonial { color: #ccc; }
+    .story-card .dua { color: #1a5c3a; font-size: 0.9rem; font-weight: 600; }
+    body.dark .story-card .dua { color: #c8a96e; }
+    .story-card .tag { display: inline-block; background: rgba(26, 92, 58, 0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; color: #1a5c3a; margin-top: 0.5rem; }
+    body.dark .story-card .tag { background: rgba(200, 169, 110, 0.2); color: #c8a96e; }
+
+    .footer { background: #0a2e1a; color: rgba(255,255,255,0.7); padding: 3rem 0; }
+    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; }
+    .footer h4 { color: #c8a96e; font-size: 1.1rem; margin-bottom: 1rem; }
+    .footer a { color: rgba(255,255,255,0.6); text-decoration: none; display: block; margin: 5px 0; transition: 0.2s; }
+    .footer a:hover { color: #c8a96e; }
+    .footer .brand { font-size: 1.3rem; font-weight: 800; color: #c8a96e; margin-bottom: 0.5rem; }
+    .footer .dua-text { text-align: center; font-family: 'Amiri', serif; font-size: 1.1rem; color: #c8a96e; padding-top: 2rem; margin-top: 2rem; border-top: 1px solid rgba(200, 169, 110, 0.15); }
+    .footer .copy { text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 1rem; }
+
+    @media (max-width: 992px) { .hero-grid { grid-template-columns: 1fr; gap: 2rem; } .hero-content h1 { font-size: 2.2rem; } }
+    @media (max-width: 768px) {
+      .nav-links { position: fixed; top: 60px; left: -100%; width: 100%; background: white; flex-direction: column; padding: 2rem; transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.1); gap: 1rem; }
+      body.dark .nav-links { background: #1a2533; }
+      .nav-links.active { left: 0; }
+      .menu-icon { display: block; }
+      .hero-content h1 { font-size: 1.8rem; }
+      .hero-features { flex-direction: column; gap: 0.5rem; }
+      .hero-form { padding: 1.5rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+      .profiles-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+      .stories-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) { .hero-content h1 { font-size: 1.5rem; } .stats-grid { grid-template-columns: 1fr 1fr; } .footer-grid { grid-template-columns: 1fr; } .profiles-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo"><span class="star">☪</span> MuslimForever</a>
+    <div class="menu-icon" id="menuIcon">☰</div>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="matches.html">Matches</a>
+      <a href="messages.html">Messages</a>
+      <a href="interest.html">Interests</a>
+      <a href="profile.html">Profile</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html" id="loginNavBtn" class="nav-btn btn-login">Login</a>
+      <a href="signup.html" id="registerNavBtn" class="nav-btn btn-register-nav">Register</a>
+      <a href="dashboard.html" id="dashboardNavBtn" class="nav-btn btn-dashboard-nav" style="display:none;">Dashboard</a>
+      <a href="#" id="logoutBtn" class="nav-btn btn-login" style="display:none;">Logout</a>
+      <button id="darkModeToggle" class="nav-btn btn-login" style="padding: 8px 16px;">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<section class="hero-section">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <h1>Find Your Perfect <span class="highlight">Muslim</span> Life Partner</h1>
+        <p class="subtitle">Join thousands of Muslims seeking a halal and meaningful marriage through a trusted matrimonial platform.</p>
+        <div class="hero-features">
+          <span class="hero-feature"><span class="icon">🔒</span> 100% Secure & Confidential</span>
+          <span class="hero-feature"><span class="icon">✅</span> Verified Profiles</span>
+        </div>
+      </div>
+      <div class="hero-form">
+        <div class="form-title">I am looking for</div>
+        <div class="form-group"><label>I am a</label><select id="heroLookingFor"><option value="">Select</option><option value="male">Brother (Male)</option><option value="female">Sister (Female)</option></select></div>
+        <div class="form-group"><label>Age</label><select id="heroAge"><option value="">Any Age</option><option value="18-25">18 - 25</option><option value="26-30">26 - 30</option><option value="31-35">31 - 35</option><option value="36-45">36 - 45</option><option value="45+">45+</option></select></div>
+        <div class="form-group"><label>Country</label><select id="heroCountry"><option value="">Select Country</option><option value="India">India</option><option value="Pakistan">Pakistan</option><option value="Bangladesh">Bangladesh</option><option value="UK">United Kingdom</option><option value="USA">United States</option><option value="Canada">Canada</option><option value="UAE">UAE</option><option value="Saudi Arabia">Saudi Arabia</option></select></div>
+        <button class="btn-get-started" onclick="handleHeroSearch()">Let's Get Started →</button>
+        <div class="trust-badge"><span class="check">✓</span> Authentic and verified profiles for a trustworthy experience.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="number" id="totalProfiles">0</div><div class="label">Verified Muslim Singles</div></div>
+      <div class="stat-item"><div class="number" id="totalStories">0</div><div class="label">Success Stories</div></div>
+      <div class="stat-item"><div class="number" id="totalCountries">0</div><div class="label">Countries</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="profiles-section" id="profilesSection">
+  <div class="container">
+    <h2 class="section-title">Recent <span class="highlight">Muslim Singles</span></h2>
+    <p class="section-subtitle">Connect with verified Muslim brothers and sisters seeking marriage</p>
+    <div id="profilesContainer" class="profiles-grid"></div>
+  </div>
+</section>
+
+<section class="stories-section">
+  <div class="container">
+    <h2 class="section-title">💑 <span class="highlight">Success Stories</span></h2>
+    <p class="section-subtitle">Real people, real stories of love and blessings</p>
+    <div id="storiesContainer" class="stories-grid"></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><div class="brand">☪ MuslimForever</div><p style="font-size: 0.85rem; margin-top: 0.5rem;">Where Faith Meets Forever</p><p style="font-size: 0.8rem; margin-top: 1rem; color: rgba(255,255,255,0.5);">Trusted Muslim Matrimony Platform</p></div>
+      <div><h4>Quick Links</h4><a href="matches.html">Browse Profiles</a><a href="signup.html">Register Free</a><a href="login.html">Login</a><a href="about.html">About Us</a></div>
+      <div><h4>Support</h4><a href="contact.html">Contact Us</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms & Conditions</a></div>
+      <div><h4>Connect</h4><a href="#">📧 Email</a><a href="#">📱 WhatsApp</a><a href="#">📘 Facebook</a><a href="#">🐦 Twitter</a></div>
+    </div>
+    <div class="dua-text">رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ</div>
+    <div class="copy">© 2026 MuslimForever — Where Faith Meets Forever. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('menuIcon')?.addEventListener('click', () => { document.getElementById('navLinks').classList.toggle('active'); });
+  document.getElementById('darkModeToggle')?.addEventListener('click', () => { document.body.classList.toggle('dark'); });
+
+  function handleHeroSearch() {
+    const lookingFor = document.getElementById('heroLookingFor').value;
+    const age = document.getElementById('heroAge').value;
+    const country = document.getElementById('heroCountry').value;
+    let url = 'matches.html?';
+    if (lookingFor) url += `gender=${lookingFor}&`;
+    if (age) url += `age=${age}&`;
+    if (country) url += `country=${encodeURIComponent(country)}&`;
+    window.location.href = url.slice(0, -1);
+  }
+
+  async function checkAuth() {
+    try {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      const loginBtn = document.getElementById('loginNavBtn');
+      const registerBtn = document.getElementById('registerNavBtn');
+      const dashboardBtn = document.getElementById('dashboardNavBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (user) {
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (registerBtn) registerBtn.style.display = 'none';
+        if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        logoutBtn.onclick = async (e) => { e.preventDefault(); await supabaseClient.auth.signOut(); window.location.reload(); };
+      } else {
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (registerBtn) registerBtn.style.display = 'inline-block';
+        if (dashboardBtn) dashboardBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+      }
+    } catch (err) { console.error('Auth error:', err); }
+  }
+
+  async function loadProfiles() {
+    const container = document.getElementById('profilesContainer');
+    container.innerHTML = `<div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>`;
+    try {
+      const { data, error } = await supabaseClient.from('profiles').select('*').eq('approved', true).eq('is_verified', true).order('created_at', { ascending: false }).limit(8);
+      if (error || !data || data.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #888;">🕌 No profiles yet. Be the first to <a href="signup.html" style="color: #1a5c3a; font-weight: 600;">register</a>!</div>`;
+        return;
+      }
+      container.innerHTML = data.map(p => `
+        <div class="profile-card">
+          <img src="${p.image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.name) + '&background=c8a96e&color=0a2e1a&size=100'}" class="profile-image" alt="${p.name}">
+          <div class="profile-name">${p.name}</div>
+          <div class="profile-detail">${p.age || 'N/A'} years • ${p.gender === 'male' ? 'Brother' : 'Sister'}</div>
+          <div class="profile-detail">${p.city || 'N/A'}, ${p.country || 'N/A'}</div>
+          <div><span class="profile-badge">${p.religious_practice || 'Muslim'}</span>${p.occupation ? `<span class="profile-badge">${p.occupation}</span>` : ''}</div>
+          <a href="profile.html?id=${p.id}" class="view-btn">View Profile →</a>
+        </div>
+      `).join('');
+    } catch (err) { container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #888;">Error loading profiles.</p>`; }
+  }
+
+  async function loadSuccessStories() {
+    const container = document.getElementById('storiesContainer');
+    try {
+      const { data, error } = await supabaseClient.from('success_stories').select('*').eq('approved', true).order('created_at', { ascending: false }).limit(3);
+      if (error || !data || data.length === 0) { container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2rem;"><p style="color: #888;">💑 Success stories coming soon!</p></div>`; return; }
+      container.innerHTML = data.map(s => `
+        <div class="story-card">
+          <div class="couple-icon">👫</div>
+          <div class="couple-name">${s.name1} & ${s.name2}</div>
+          <div class="couple-location">📍 ${s.location || 'N/A'}</div>
+          <p class="testimonial">"${s.story || 'A beautiful journey together.'}"</p>
+          <div class="dua">${s.married_year ? `Married ${s.married_year}` : 'Alhamdulillah'}</div>
+          <span class="tag">❤️ Blessed Union</span>
+        </div>
+      `).join('');
+    } catch (err) { console.error('Error loading stories:', err); }
+  }
+
+  async function loadStats() {
+    try {
+      const { count: profileCount } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).eq('approved', true).eq('is_verified', true);
+      document.getElementById('totalProfiles').textContent = profileCount || 0;
+      const { count: storyCount } = await supabaseClient.from('success_stories').select('*', { count: 'exact', head: true }).eq('approved', true);
+      document.getElementById('totalStories').textContent = storyCount || 0;
+      const { data: countries } = await supabaseClient.from('profiles').select('country').eq('approved', true).eq('is_verified', true);
+      const uniqueCountries = new Set(countries?.map(p => p.country).filter(Boolean) || []);
+      document.getElementById('totalCountries').textContent = uniqueCountries.size || 0;
+    } catch (err) { console.error('Error loading stats:', err); }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadStats(); loadProfiles(); loadSuccessStories();
+    setTimeout(checkAuth, 500);
+  });
+  document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', () => { document.getElementById('navLinks').classList.remove('active'); }));
+</script>
+</body>
+</html>
