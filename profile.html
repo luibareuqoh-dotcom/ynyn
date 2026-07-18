@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interests | MuslimForever</title>
+  <title>Profile | MuslimForever</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="supabase.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
     body { background:#f5f0eb; color:#1a1a2e; }
     body.dark { background:#0f1724; color:#eef2ff; }
-    .container { max-width:1000px; margin:0 auto; padding:0 20px; }
+    .container { max-width:800px; margin:0 auto; padding:0 20px; }
 
     .navbar { background:white; padding:12px 0; box-shadow:0 2px 10px rgba(0,0,0,0.05); position:sticky; top:0; z-index:1000; }
     body.dark .navbar { background:#1a2533; }
@@ -41,67 +41,33 @@
     .menu-icon { display:none; font-size:1.5rem; cursor:pointer; color:#333; }
     body.dark .menu-icon { color:white; }
 
-    .section-title { text-align:center; font-size:2rem; font-weight:700; margin:2rem 0 0.5rem; }
-    .section-title .highlight { color:#1a5c3a; }
-    body.dark .section-title .highlight { color:#c8a96e; }
-    .section-subtitle { text-align:center; color:#888; font-size:1rem; margin-bottom:2rem; }
-    body.dark .section-subtitle { color:#aaa; }
-
-    .tabs { display:flex; gap:0; margin-bottom:2rem; border-radius:16px; overflow:hidden; background:white; border:1px solid #eee; max-width:400px; margin-left:auto; margin-right:auto; }
-    body.dark .tabs { background:#1a2533; border-color:#2d3a4a; }
-    .tabs button { flex:1; padding:12px 20px; border:none; background:transparent; font-weight:600; font-size:0.95rem; cursor:pointer; transition:0.3s; color:#888; }
-    body.dark .tabs button { color:#aaa; }
-    .tabs button.active { background:#1a5c3a; color:white; }
-    body.dark .tabs button.active { background:#c8a96e; color:#1a1a2e; }
-    .tabs button:hover:not(.active) { background:#f0f0f0; }
-    body.dark .tabs button:hover:not(.active) { background:#2a3545; }
-
-    .interest-card { background:white; border-radius:16px; padding:1.2rem 1.5rem; margin-bottom:0.75rem; display:flex; align-items:center; justify-content:space-between; border:1px solid #eee; transition:0.2s; flex-wrap:wrap; gap:0.5rem; }
-    body.dark .interest-card { background:#1a2533; border-color:#2d3a4a; }
-    .interest-card:hover { border-color:#c8a96e; }
-    .interest-card .user-info { display:flex; align-items:center; gap:1rem; }
-    .interest-card .avatar { width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid #c8a96e; }
-    .interest-card .name { font-weight:700; font-size:1.05rem; }
-    .interest-card .detail { color:#888; font-size:0.85rem; }
-    body.dark .interest-card .detail { color:#aaa; }
-    .status-badge { padding:4px 14px; border-radius:20px; font-size:0.75rem; font-weight:600; }
-    .status-badge.pending { background:#fff3cd; color:#856404; }
-    body.dark .status-badge.pending { background:#2d1f1a; color:#fbbf24; }
-    .status-badge.accepted { background:#d4edda; color:#155724; }
-    body.dark .status-badge.accepted { background:#1a2d1a; color:#4ade80; }
-    .status-badge.rejected { background:#f8d7da; color:#721c24; }
-    body.dark .status-badge.rejected { background:#2d1a1a; color:#f87171; }
-    .interest-card .actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
-    .btn-sm { padding:6px 16px; border-radius:20px; border:none; font-weight:600; font-size:0.8rem; cursor:pointer; transition:0.2s; }
-    .btn-sm.accept { background:#1a5c3a; color:white; }
-    body.dark .btn-sm.accept { background:#c8a96e; color:#1a1a2e; }
-    .btn-sm.accept:hover { transform:scale(1.05); }
-    .btn-sm.reject { background:#dc3545; color:white; }
-    .btn-sm.reject:hover { transform:scale(1.05); }
-    .btn-sm.chat { background:#17a2b8; color:white; }
-    .btn-sm.chat:hover { transform:scale(1.05); }
-    .btn-sm.view { background:#6c757d; color:white; }
-    .btn-sm.view:hover { transform:scale(1.05); }
-
-    .empty-state { text-align:center; padding:3rem 1rem; background:white; border-radius:24px; border:1px solid #eee; }
-    body.dark .empty-state { background:#1a2533; border-color:#2d3a4a; }
-    .empty-state .big-icon { font-size:3rem; margin-bottom:0.5rem; }
-    .empty-state h3 { font-size:1.2rem; margin-bottom:0.5rem; }
-    .empty-state p { color:#888; }
-    body.dark .empty-state p { color:#aaa; }
-    .empty-state .btn-start { display:inline-block; margin-top:1rem; padding:12px 30px; background:#1a5c3a; color:white; border:none; border-radius:30px; font-size:1rem; font-weight:600; cursor:pointer; text-decoration:none; transition:0.3s; }
-    body.dark .empty-state .btn-start { background:#c8a96e; color:#1a1a2e; }
-    .empty-state .btn-start:hover { transform:scale(1.02); box-shadow:0 6px 20px rgba(26,92,58,0.3); }
+    .profile-card { background:white; border-radius:24px; padding:2.5rem; margin:2rem 0; box-shadow:0 6px 30px rgba(0,0,0,0.05); border:1px solid #eee; text-align:center; }
+    body.dark .profile-card { background:#1a2533; border-color:#2d3a4a; }
+    .profile-card .avatar { width:150px; height:150px; border-radius:50%; object-fit:cover; border:4px solid #c8a96e; margin:0 auto 1rem; display:block; }
+    .profile-card .name { font-size:1.8rem; font-weight:700; }
+    .profile-card .detail { color:#888; font-size:1rem; margin:5px 0; }
+    body.dark .profile-card .detail { color:#aaa; }
+    .profile-card .badge { display:inline-block; background:rgba(26,92,58,0.1); color:#1a5c3a; padding:4px 14px; border-radius:20px; font-size:0.8rem; margin:5px; }
+    body.dark .profile-card .badge { background:rgba(200,169,110,0.2); color:#c8a96e; }
+    .profile-card .bio { margin:1.5rem 0; line-height:1.6; color:#555; }
+    body.dark .profile-card .bio { color:#ccc; }
+    .profile-card .action-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1.5rem; }
+    .profile-card .action-btn { padding:10px 30px; border-radius:40px; border:none; font-weight:600; cursor:pointer; transition:0.2s; }
+    .profile-card .action-btn.primary { background:#1a5c3a; color:white; }
+    body.dark .profile-card .action-btn.primary { background:#c8a96e; color:#1a1a2e; }
+    .profile-card .action-btn.primary:hover { transform:scale(1.02); box-shadow:0 6px 20px rgba(26,92,58,0.3); }
+    body.dark .profile-card .action-btn.primary:hover { box-shadow:0 6px 20px rgba(200,169,110,0.3); }
+    .profile-card .action-btn.outline { background:transparent; border:2px solid #1a5c3a; color:#1a5c3a; }
+    body.dark .profile-card .action-btn.outline { border-color:#c8a96e; color:#c8a96e; }
+    .profile-card .action-btn.outline:hover { background:#1a5c3a; color:white; }
+    body.dark .profile-card .action-btn.outline:hover { background:#c8a96e; color:#1a1a2e; }
 
     @media (max-width:768px) {
       .nav-links { position:fixed; top:60px; left:-100%; width:100%; background:white; flex-direction:column; padding:2rem; transition:0.3s; box-shadow:0 10px 30px rgba(0,0,0,0.08); gap:1rem; }
       body.dark .nav-links { background:#1a2533; }
       .nav-links.active { left:0; }
       .menu-icon { display:block; }
-      .interest-card { flex-direction:column; align-items:stretch; text-align:center; }
-      .interest-card .user-info { justify-content:center; }
-      .interest-card .actions { justify-content:center; }
-      .tabs { max-width:100%; }
+      .profile-card { padding:1.5rem; }
     }
   </style>
 </head>
@@ -114,8 +80,8 @@
       <a href="index.html">Home</a>
       <a href="matches.html">Matches</a>
       <a href="messages.html">Messages</a>
-      <a href="interest.html" class="active">Interests</a>
-      <a href="profile.html">Profile</a>
+      <a href="interest.html">Interests</a>
+      <a href="profile.html" class="active">Profile</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
       <a href="login.html" id="loginNavBtn" class="nav-btn btn-login">Login</a>
@@ -128,13 +94,9 @@
 </nav>
 
 <div class="container">
-  <h2 class="section-title">❤️ <span class="highlight">Interests</span></h2>
-  <p class="section-subtitle">Manage your interests - Sent & Received</p>
-  <div class="tabs">
-    <button class="active" onclick="switchTab('received')">📥 Received</button>
-    <button onclick="switchTab('sent')">📤 Sent</button>
+  <div id="profileContainer">
+    <div class="profile-card" style="text-align:center;padding:3rem;color:#888;">Loading profile...</div>
   </div>
-  <div id="interestsList"></div>
 </div>
 
 <footer style="background:#0a2e1a; color:rgba(255,255,255,0.6); padding:2rem 0; margin-top:3rem; text-align:center;">
@@ -145,13 +107,9 @@
   document.getElementById('menuIcon')?.addEventListener('click', () => { document.getElementById('navLinks').classList.toggle('active'); });
   document.getElementById('darkModeToggle')?.addEventListener('click', () => { document.body.classList.toggle('dark'); });
 
-  let currentUser = null;
-  let currentTab = 'received';
-
   async function updateNav() {
     const { data } = await supabaseClient.auth.getUser();
     const user = data?.user;
-    currentUser = user;
     const loginBtn = document.getElementById('loginNavBtn');
     const registerBtn = document.getElementById('registerNavBtn');
     const dashboardBtn = document.getElementById('dashboardNavBtn');
@@ -169,96 +127,51 @@
       if (logoutBtn) logoutBtn.style.display = 'none';
     }
   }
+  updateNav();
 
-  function getTimeAgo(date) {
-    const now = new Date();
-    const diff = Math.floor((now - new Date(date)) / 1000);
-    if (diff < 60) return 'Just now';
-    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-    if (diff < 172800) return 'Yesterday';
-    return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  }
-
-  window.switchTab = (tab) => {
-    currentTab = tab;
-    document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
-    if (tab === 'received') { document.querySelector('.tabs button:first-child').classList.add('active'); } else { document.querySelector('.tabs button:last-child').classList.add('active'); }
-    loadInterests();
-  };
-
-  async function loadInterests() {
-    const container = document.getElementById('interestsList');
-    if (!currentUser) {
-      container.innerHTML = `<div class="empty-state"><div class="big-icon">🔒</div><h3>Please Login</h3><p>Login to see your interests</p><a href="login.html" class="btn-start">🔑 Login Now</a></div>`;
+  async function loadProfile() {
+    const container = document.getElementById('profileContainer');
+    const urlParams = new URLSearchParams(window.location.search);
+    const profileId = urlParams.get('id');
+    if (!profileId) {
+      container.innerHTML = `<div class="profile-card" style="text-align:center;padding:3rem;color:#888;">No profile specified.</div>`;
       return;
     }
-    try {
-      const { data, error } = await supabaseClient.from('interests').select(`*, sender:sender_id(id, name, image, gender, age, country, city), receiver:receiver_id(id, name, image, gender, age, country, city)`).or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`).order('created_at', { ascending: false });
-      if (error) throw error;
-      if (!data || data.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="big-icon">💔</div><h3>No Interests Yet</h3><p>${currentTab === 'received' ? 'No one has sent you interest yet.' : 'You haven\'t sent any interest yet.'}</p><a href="matches.html" class="btn-start">👀 Find Matches</a></div>`;
-        return;
-      }
-      let filtered = data;
-      if (currentTab === 'received') { filtered = data.filter(i => i.receiver_id === currentUser.id); } else { filtered = data.filter(i => i.sender_id === currentUser.id); }
-      if (filtered.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="big-icon">📭</div><h3>No ${currentTab === 'received' ? 'Received' : 'Sent'} Interests</h3><p>${currentTab === 'received' ? 'No one has sent you interest yet.' : 'You haven\'t sent any interest yet.'}</p></div>`;
-        return;
-      }
-      let html = '';
-      for (const interest of filtered) {
-        const isReceived = interest.receiver_id === currentUser.id;
-        const other = isReceived ? interest.sender : interest.receiver;
-        const name = other?.name || 'Unknown User';
-        const img = other?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=c8a96e&color=0a2e1a&size=50`;
-        const gender = other?.gender || '';
-        const genderLabel = gender === 'male' ? 'Brother' : gender === 'female' ? 'Sister' : '';
-        const age = other?.age || '';
-        const location = [other?.city, other?.country].filter(Boolean).join(', ');
-        const status = interest.status || 'pending';
-        const timeAgo = getTimeAgo(interest.created_at);
-        const statusColors = { pending: 'pending', accepted: 'accepted', rejected: 'rejected' };
-        let actions = '';
-        if (isReceived && status === 'pending') {
-          actions = `<button class="btn-sm accept" onclick="respondInterest('${interest.id}','accepted')">✅ Accept</button><button class="btn-sm reject" onclick="respondInterest('${interest.id}','rejected')">❌ Decline</button>`;
-        } else if (status === 'accepted') {
-          actions = `<button class="btn-sm chat" onclick="openChat('${other?.id}')">💬 Message</button><button class="btn-sm view" onclick="viewProfile('${other?.id}')">👤 View</button>`;
-        } else if (status === 'rejected') {
-          actions = `<span style="color:#888;font-size:0.8rem;">Declined</span>`;
-        } else if (status === 'pending' && !isReceived) {
-          actions = `<span style="color:#888;font-size:0.8rem;">⏳ Waiting for response</span>`;
-        }
-        html += `<div class="interest-card"><div class="user-info"><img src="${img}" class="avatar" alt="${name}"><div><div class="name">${name} ${genderLabel ? `(${genderLabel})` : ''}</div><div class="detail">${age ? age + ' years' : ''} ${location ? '• ' + location : ''}</div><div class="detail" style="font-size:0.75rem;color:#999;">${timeAgo}</div></div></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;"><span class="status-badge ${statusColors[status] || 'pending'}">${status.charAt(0).toUpperCase() + status.slice(1)}</span><div class="actions">${actions}</div></div></div>`;
-      }
-      container.innerHTML = html;
-    } catch (err) {
-      console.error('Error:', err);
-      container.innerHTML = `<div class="empty-state"><div class="big-icon">⚠️</div><h3>Error Loading Interests</h3><p>${err.message || 'Please try again later.'}</p><button onclick="loadInterests()" class="btn-sm accept" style="margin-top:1rem;padding:8px 24px;">🔄 Retry</button></div>`;
+    const { data, error } = await supabaseClient.from('profiles').select('*').eq('id', profileId).eq('approved', true).eq('is_verified', true).maybeSingle();
+    if (error || !data) {
+      container.innerHTML = `<div class="profile-card" style="text-align:center;padding:3rem;color:#888;">Profile not found or not approved.</div>`;
+      return;
     }
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const isOwn = user && data.user_id === user.id;
+    container.innerHTML = `
+      <div class="profile-card">
+        <img src="${data.image || 'https://ui-avatars.com/api/?name='+encodeURIComponent(data.name)+'&background=c8a96e&color=0a2e1a&size=150'}" class="avatar" alt="${data.name}">
+        <div class="name">${data.name}</div>
+        <div class="detail">${data.age || 'N/A'} years · ${data.gender === 'male' ? 'Brother' : 'Sister'}</div>
+        <div class="detail">${data.city || 'N/A'}, ${data.country || 'N/A'}</div>
+        <div><span class="badge">${data.religious_practice || 'Muslim'}</span>${data.occupation ? `<span class="badge">${data.occupation}</span>` : ''}<span class="badge">${data.is_verified ? '✅ Verified' : '⏳ Pending'}</span></div>
+        ${data.about_me ? `<div class="bio">${data.about_me}</div>` : ''}
+        <div class="action-btns">
+          ${!isOwn ? `<button class="action-btn primary" onclick="sendInterest('${data.user_id}')">❤️ Send Interest</button><button class="action-btn outline" onclick="startChat('${data.user_id}')">💬 Message</button>` : `<a href="dashboard.html" class="action-btn primary" style="text-decoration:none;">📊 Edit Profile</a>`}
+        </div>
+      </div>
+    `;
   }
 
-  window.respondInterest = async (interestId, status) => {
-    if (!currentUser) { alert('Please login first.'); return; }
-    try {
-      const { error } = await supabaseClient.from('interests').update({ status: status }).eq('id', interestId);
-      if (error) throw error;
-      alert(status === 'accepted' ? '✅ Interest accepted! You can now chat with this person.' : '❌ Interest declined.');
-      loadInterests();
-    } catch (err) { alert('Error: ' + err.message); }
+  window.sendInterest = async (userId) => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) { alert('Please login to send interest.'); window.location.href = 'login.html'; return; }
+    const { data: existing } = await supabaseClient.from('interests').select('id').eq('sender_id', user.id).eq('receiver_id', userId).maybeSingle();
+    if (existing) { alert('You already sent interest to this person.'); return; }
+    const { error } = await supabaseClient.from('interests').insert({ sender_id: user.id, receiver_id: userId, status: 'pending' });
+    if (error) alert('Error: ' + error.message);
+    else alert('✅ Interest sent! May Allah bless your journey.');
   };
 
-  window.openChat = (userId) => { if (!userId) return; window.location.href = `chat.html?user=${userId}`; };
-  window.viewProfile = (userId) => { if (!userId) return; window.location.href = `profile.html?user=${userId}`; };
+  window.startChat = (userId) => { window.location.href = `chat.html?user=${userId}`; };
 
-  function subscribeToInterests() {
-    if (!currentUser) return;
-    const channel = supabaseClient.channel('interests-channel').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'interests', filter: `receiver_id.eq.${currentUser.id}` }, () => { loadInterests(); }).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'interests', filter: `sender_id.eq.${currentUser.id}` }, () => { loadInterests(); }).subscribe();
-    return channel;
-  }
-
-  async function init() { await updateNav(); await loadInterests(); if (currentUser) { subscribeToInterests(); setInterval(loadInterests, 30000); } }
-  init();
+  loadProfile();
   document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => { document.getElementById('navLinks').classList.remove('active'); }));
 </script>
 </body>
