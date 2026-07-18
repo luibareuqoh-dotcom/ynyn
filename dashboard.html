@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | MuslimForever</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="supabase.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+    body { background:#f5f0eb; color:#1a1a2e; }
+    body.dark { background:#0f1724; color:#eef2ff; }
+    .container { max-width:1200px; margin:0 auto; padding:0 20px; }
+
+    .navbar { background:white; padding:12px 0; box-shadow:0 2px 10px rgba(0,0,0,0.05); position:sticky; top:0; z-index:1000; }
+    body.dark .navbar { background:#1a2533; }
+    .nav-container { display:flex; justify-content:space-between; align-items:center; max-width:1200px; margin:0 auto; padding:0 20px; }
+    .logo { font-size:1.5rem; font-weight:800; color:#1a5c3a; display:flex; align-items:center; gap:8px; text-decoration:none; }
+    body.dark .logo { color:#c8a96e; }
+    .logo .star { color:#c8a96e; }
+    .nav-links { display:flex; gap:1.5rem; align-items:center; flex-wrap:wrap; }
+    .nav-links a { text-decoration:none; color:#333; font-weight:500; transition:0.2s; }
+    body.dark .nav-links a { color:#eef2ff; }
+    .nav-links a:hover { color:#1a5c3a; }
+    body.dark .nav-links a:hover { color:#c8a96e; }
+    .nav-links a.active { color:#1a5c3a; font-weight:700; }
+    body.dark .nav-links a.active { color:#c8a96e; }
+    .nav-btn { padding:8px 20px; border-radius:25px; border:none; font-weight:600; cursor:pointer; transition:0.2s; text-decoration:none; display:inline-block; }
+    .btn-login { background:transparent; color:#1a5c3a; border:2px solid #1a5c3a; }
+    body.dark .btn-login { color:#c8a96e; border-color:#c8a96e; }
+    .btn-login:hover { background:#1a5c3a; color:white; }
+    body.dark .btn-login:hover { background:#c8a96e; color:#1a1a2e; }
+    .btn-register-nav { background:#1a5c3a; color:white; }
+    body.dark .btn-register-nav { background:#c8a96e; color:#1a1a2e; }
+    .btn-register-nav:hover { background:#0d4028; transform:scale(1.02); }
+    body.dark .btn-register-nav:hover { background:#dbb97e; }
+    .btn-dashboard-nav { background:#c8a96e; color:#1a1a2e; }
+    body.dark .btn-dashboard-nav { background:#1a5c3a; color:white; }
+    .btn-dashboard-nav:hover { background:#dbb97e; transform:scale(1.02); }
+    body.dark .btn-dashboard-nav:hover { background:#2a7a4a; }
+    .menu-icon { display:none; font-size:1.5rem; cursor:pointer; color:#333; }
+    body.dark .menu-icon { color:white; }
+
+    .dashboard-container { display:flex; gap:2rem; margin:2rem 0; }
+    .sidebar { width:250px; background:white; border-radius:20px; padding:1.5rem; border:1px solid #eee; height:fit-content; }
+    body.dark .sidebar { background:#1a2533; border-color:#2d3a4a; }
+    .sidebar a { display:block; padding:12px 16px; text-decoration:none; color:#333; border-radius:12px; transition:0.2s; cursor:pointer; margin-bottom:4px; }
+    body.dark .sidebar a { color:#eef2ff; }
+    .sidebar a:hover, .sidebar a.active { background:#1a5c3a; color:white; }
+    body.dark .sidebar a:hover, body.dark .sidebar a.active { background:#c8a96e; color:#1a1a2e; }
+    .main-content { flex:1; }
+    .main-content .glass-card { background:white; border-radius:20px; padding:1.5rem; margin-bottom:1.5rem; border:1px solid #eee; }
+    body.dark .main-content .glass-card { background:#1a2533; border-color:#2d3a4a; }
+    .main-content h2 { font-size:1.5rem; margin-bottom:1rem; }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+    .stat-card { background:#f5f0eb; padding:1rem; border-radius:16px; text-align:center; }
+    body.dark .stat-card { background:#0f1724; }
+    .stat-card .number { font-size:2rem; font-weight:800; color:#1a5c3a; }
+    body.dark .stat-card .number { color:#c8a96e; }
+    .stat-card .label { color:#888; font-size:0.85rem; }
+    body.dark .stat-card .label { color:#aaa; }
+    .profile-item { display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0; border-bottom:1px solid #eee; flex-wrap:wrap; }
+    body.dark .profile-item { border-color:#2d3a4a; }
+    .profile-item:last-child { border-bottom:none; }
+    .profile-item .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:0.75rem; }
+    .badge.approved { background:#dcfce7; color:#16a34a; }
+    .badge.pending { background:#fef3c7; color:#d97706; }
+    body.dark .badge.approved { background:#1a2d1a; color:#4ade80; }
+    body.dark .badge.pending { background:#2d1f1a; color:#fbbf24; }
+    .btn-edit { padding:6px 16px; border-radius:20px; border:none; background:#1a5c3a; color:white; cursor:pointer; }
+    body.dark .btn-edit { background:#c8a96e; color:#1a1a2e; }
+
+    @media (max-width:768px) {
+      .nav-links { position:fixed; top:60px; left:-100%; width:100%; background:white; flex-direction:column; padding:2rem; transition:0.3s; box-shadow:0 10px 30px rgba(0,0,0,0.08); gap:1rem; }
+      body.dark .nav-links { background:#1a2533; }
+      .nav-links.active { left:0; }
+      .menu-icon { display:block; }
+      .dashboard-container { flex-direction:column; }
+      .sidebar { width:100%; }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo"><span class="star">☪</span> MuslimForever</a>
+    <div class="menu-icon" id="menuIcon">☰</div>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="matches.html">Matches</a>
+      <a href="messages.html">Messages</a>
+      <a href="interest.html">Interests</a>
+      <a href="profile.html">Profile</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html" id="loginNavBtn" class="nav-btn btn-login" style="display:none;">Login</a>
+      <a href="signup.html" id="registerNavBtn" class="nav-btn btn-register-nav" style="display:none;">Register</a>
+      <a href="dashboard.html" id="dashboardNavBtn" class="nav-btn btn-dashboard-nav">Dashboard</a>
+      <a href="#" id="logoutBtn" class="nav-btn btn-login">Logout</a>
+      <button id="darkModeToggle" class="nav-btn btn-login" style="padding:8px 16px;">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="dashboard-container">
+    <div class="sidebar">
+      <a href="#" class="active" onclick="showSection('profile')">👤 My Profile</a>
+      <a href="#" onclick="showSection('interests')">❤️ Interests</a>
+      <a href="#" onclick="showSection('settings')">⚙️ Settings</a>
+    </div>
+    <div class="main-content">
+      <div id="profileSection">
+        <h2>👤 My Profile</h2>
+        <div id="profileInfo" class="glass-card">Loading...</div>
+      </div>
+      <div id="interestsSection" style="display:none;">
+        <h2>❤️ Interests</h2>
+        <div id="interestsList" class="glass-card">Loading...</div>
+      </div>
+      <div id="settingsSection" style="display:none;">
+        <h2>⚙️ Settings</h2>
+        <div class="glass-card">
+          <p><strong>Account Type:</strong> <span id="accountType">User</span></p>
+          <p><strong>Member Since:</strong> <span id="memberSince">-</span></p>
+          <button class="btn-edit" onclick="logout()" style="margin-top:1rem;">🚪 Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer style="background:#0a2e1a; color:rgba(255,255,255,0.6); padding:2rem 0; margin-top:3rem; text-align:center;">
+  <div class="container"><p style="font-size:0.85rem;">☪ MuslimForever — Where Faith Meets Forever</p></div>
+</footer>
+
+<script>
+  document.getElementById('menuIcon')?.addEventListener('click', () => { document.getElementById('navLinks').classList.toggle('active'); });
+  document.getElementById('darkModeToggle')?.addEventListener('click', () => { document.body.classList.toggle('dark'); });
+
+  let currentUser = null;
+
+  async function checkAuth() {
+    const { data } = await supabaseClient.auth.getUser();
+    if (!data?.user) { window.location.href = 'login.html'; return; }
+    currentUser = data.user;
+    loadProfile();
+    loadInterests();
+    document.getElementById('memberSince').textContent = new Date(currentUser.created_at).toLocaleDateString();
+  }
+
+  async function loadProfile() {
+    const container = document.getElementById('profileInfo');
+    const { data, error } = await supabaseClient.from('profiles').select('*').eq('user_id', currentUser.id).maybeSingle();
+    if (error || !data) {
+      container.innerHTML = `<p>Profile not found. <a href="signup.html" style="color:#1a5c3a;">Complete registration</a></p>`;
+      return;
+    }
+    container.innerHTML = `
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+        <img src="${data.image || 'https://ui-avatars.com/api/?name='+encodeURIComponent(data.name)+'&background=c8a96e&color=0a2e1a&size=100'}" style="width:100px;height:100px;border-radius:50%;border:3px solid #c8a96e;object-fit:cover;">
+        <div>
+          <h3>${data.name}</h3>
+          <p>${data.age || 'N/A'} yrs · ${data.gender === 'male' ? 'Brother' : 'Sister'}</p>
+          <p>${data.city || 'N/A'}, ${data.country || 'N/A'}</p>
+          <p><span class="badge ${data.approved ? 'approved' : 'pending'}">${data.approved ? '✅ Approved' : '⏳ Pending Approval'}</span>
+          <span class="badge ${data.is_verified ? 'approved' : 'pending'}">${data.is_verified ? '✅ Verified' : '⏳ Not Verified'}</span></p>
+          <p><strong>Religious Practice:</strong> ${data.religious_practice || 'Not specified'}</p>
+          ${data.about_me ? `<p><strong>About:</strong> ${data.about_me}</p>` : ''}
+          <button class="btn-edit" onclick="editProfile()" style="margin-top:0.5rem;">✏️ Edit Profile</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadInterests() {
+    const container = document.getElementById('interestsList');
+    const { data, error } = await supabaseClient.from('interests').select('*, sender:sender_id(id, name, image), receiver:receiver_id(id, name, image)').or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`).order('created_at', { ascending: false });
+    if (error || !data || data.length === 0) {
+      container.innerHTML = '<p>No interests yet.</p>';
+      return;
+    }
+    container.innerHTML = data.map(i => {
+      const isSender = i.sender_id === currentUser.id;
+      const other = isSender ? i.receiver : i.sender;
+      return `
+        <div class="profile-item">
+          <div>
+            <strong>${other?.name || 'User'}</strong>
+            <span class="badge ${i.status === 'accepted' ? 'approved' : 'pending'}">${i.status || 'pending'}</span>
+            <span style="font-size:0.8rem;color:#888;">${isSender ? '→ Sent' : '← Received'}</span>
+          </div>
+          <div>
+            ${i.status === 'pending' && !isSender ? `<button class="btn-edit" onclick="respondInterest('${i.id}','accepted')">Accept</button> <button class="btn-edit" style="background:#dc2626;" onclick="respondInterest('${i.id}','rejected')">Decline</button>` : ''}
+            <button class="btn-edit" onclick="window.location.href='chat.html?user=${other?.id}'">💬 Chat</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.respondInterest = async (id, status) => {
+    const { error } = await supabaseClient.from('interests').update({ status }).eq('id', id);
+    if (error) alert('Error: ' + error.message);
+    else loadInterests();
+  };
+
+  window.editProfile = () => { window.location.href = 'signup.html?edit=true'; };
+
+  window.showSection = (section) => {
+    document.getElementById('profileSection').style.display = section === 'profile' ? 'block' : 'none';
+    document.getElementById('interestsSection').style.display = section === 'interests' ? 'block' : 'none';
+    document.getElementById('settingsSection').style.display = section === 'settings' ? 'block' : 'none';
+    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+    document.querySelector(`.sidebar a[onclick*="${section}"]`)?.classList.add('active');
+  };
+
+  window.logout = async () => { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
+
+  document.getElementById('logoutBtn')?.addEventListener('click', logout);
+  checkAuth();
+
+  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => { document.getElementById('navLinks').classList.remove('active'); }));
+</script>
+</body>
+</html>

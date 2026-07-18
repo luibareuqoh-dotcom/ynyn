@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matches | MuslimForever</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="supabase.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+    body { background:#f5f0eb; color:#1a1a2e; }
+    body.dark { background:#0f1724; color:#eef2ff; }
+    .container { max-width:1200px; margin:0 auto; padding:0 20px; }
+
+    .navbar { background:white; padding:12px 0; box-shadow:0 2px 10px rgba(0,0,0,0.05); position:sticky; top:0; z-index:1000; }
+    body.dark .navbar { background:#1a2533; }
+    .nav-container { display:flex; justify-content:space-between; align-items:center; max-width:1200px; margin:0 auto; padding:0 20px; }
+    .logo { font-size:1.5rem; font-weight:800; color:#1a5c3a; display:flex; align-items:center; gap:8px; text-decoration:none; }
+    body.dark .logo { color:#c8a96e; }
+    .logo .star { color:#c8a96e; }
+    .nav-links { display:flex; gap:1.5rem; align-items:center; flex-wrap:wrap; }
+    .nav-links a { text-decoration:none; color:#333; font-weight:500; transition:0.2s; }
+    body.dark .nav-links a { color:#eef2ff; }
+    .nav-links a:hover { color:#1a5c3a; }
+    body.dark .nav-links a:hover { color:#c8a96e; }
+    .nav-links a.active { color:#1a5c3a; font-weight:700; }
+    body.dark .nav-links a.active { color:#c8a96e; }
+    .nav-btn { padding:8px 20px; border-radius:25px; border:none; font-weight:600; cursor:pointer; transition:0.2s; text-decoration:none; display:inline-block; }
+    .btn-login { background:transparent; color:#1a5c3a; border:2px solid #1a5c3a; }
+    body.dark .btn-login { color:#c8a96e; border-color:#c8a96e; }
+    .btn-login:hover { background:#1a5c3a; color:white; }
+    body.dark .btn-login:hover { background:#c8a96e; color:#1a1a2e; }
+    .btn-register-nav { background:#1a5c3a; color:white; }
+    body.dark .btn-register-nav { background:#c8a96e; color:#1a1a2e; }
+    .btn-register-nav:hover { background:#0d4028; transform:scale(1.02); }
+    body.dark .btn-register-nav:hover { background:#dbb97e; }
+    .btn-dashboard-nav { background:#c8a96e; color:#1a1a2e; }
+    body.dark .btn-dashboard-nav { background:#1a5c3a; color:white; }
+    .btn-dashboard-nav:hover { background:#dbb97e; transform:scale(1.02); }
+    body.dark .btn-dashboard-nav:hover { background:#2a7a4a; }
+    .menu-icon { display:none; font-size:1.5rem; cursor:pointer; color:#333; }
+    body.dark .menu-icon { color:white; }
+
+    .section-title { text-align:center; font-size:2rem; font-weight:700; margin:2rem 0 1rem; }
+    .section-title .highlight { color:#1a5c3a; }
+    body.dark .section-title .highlight { color:#c8a96e; }
+
+    .match-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(270px,1fr)); gap:2rem; margin:2rem 0; }
+    .match-card { background:white; border-radius:24px; padding:1.5rem; box-shadow:0 6px 24px rgba(0,0,0,0.04); border:1px solid #eee; transition:0.25s; display:flex; flex-direction:column; align-items:center; text-align:center; }
+    body.dark .match-card { background:#1a2533; border-color:#2d3a4a; }
+    .match-card:hover { transform:translateY(-6px); box-shadow:0 12px 32px rgba(0,0,0,0.08); }
+    .match-card .avatar { width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid #c8a96e; margin-bottom:12px; }
+    .match-card .name { font-size:1.2rem; font-weight:700; }
+    .match-card .detail { color:#888; font-size:0.9rem; margin:2px 0; }
+    body.dark .match-card .detail { color:#aaa; }
+    .match-card .badge { display:inline-block; background:rgba(26,92,58,0.08); color:#1a5c3a; padding:4px 12px; border-radius:20px; font-size:0.7rem; margin:4px 2px; }
+    body.dark .match-card .badge { background:rgba(200,169,110,0.15); color:#c8a96e; }
+    .action-btn { margin-top:14px; padding:8px 22px; border-radius:40px; border:none; font-weight:600; cursor:pointer; transition:0.2s; width:100%; background:#1a5c3a; color:white; }
+    body.dark .action-btn { background:#c8a96e; color:#1a1a2e; }
+    .action-btn:hover { transform:scale(1.02); box-shadow:0 6px 16px rgba(26,92,58,0.25); }
+    .action-btn.outline { background:transparent; border:2px solid #1a5c3a; color:#1a5c3a; }
+    body.dark .action-btn.outline { border-color:#c8a96e; color:#c8a96e; }
+    .action-btn.outline:hover { background:#1a5c3a; color:white; }
+    body.dark .action-btn.outline:hover { background:#c8a96e; color:#1a1a2e; }
+
+    .filter-bar { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; background:white; padding:1rem 1.5rem; border-radius:40px; margin:1rem auto 2rem; max-width:800px; }
+    body.dark .filter-bar { background:#1a2533; }
+    .filter-bar select, .filter-bar input { padding:8px 16px; border-radius:30px; border:1px solid #ddd; background:transparent; font-size:0.9rem; }
+    body.dark .filter-bar select, body.dark .filter-bar input { border-color:#3d4a5a; color:white; background:#2a3545; }
+
+    @media (max-width:768px) {
+      .nav-links { position:fixed; top:60px; left:-100%; width:100%; background:white; flex-direction:column; padding:2rem; transition:0.3s; box-shadow:0 10px 30px rgba(0,0,0,0.08); gap:1rem; }
+      body.dark .nav-links { background:#1a2533; }
+      .nav-links.active { left:0; }
+      .menu-icon { display:block; }
+      .match-grid { grid-template-columns:1fr 1fr; }
+    }
+    @media (max-width:480px) { .match-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo"><span class="star">☪</span> MuslimForever</a>
+    <div class="menu-icon" id="menuIcon">☰</div>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="matches.html" class="active">Matches</a>
+      <a href="messages.html">Messages</a>
+      <a href="interest.html">Interests</a>
+      <a href="profile.html">Profile</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html" id="loginNavBtn" class="nav-btn btn-login">Login</a>
+      <a href="signup.html" id="registerNavBtn" class="nav-btn btn-register-nav">Register</a>
+      <a href="dashboard.html" id="dashboardNavBtn" class="nav-btn btn-dashboard-nav" style="display:none;">Dashboard</a>
+      <a href="#" id="logoutBtn" class="nav-btn btn-login" style="display:none;">Logout</a>
+      <button id="darkModeToggle" class="nav-btn btn-login" style="padding:8px 16px;">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <h2 class="section-title">🤝 <span class="highlight">Muslim Singles</span></h2>
+  <div class="filter-bar">
+    <select id="genderFilter"><option value="">All</option><option value="male">Brother</option><option value="female">Sister</option></select>
+    <select id="ageFilter"><option value="">Age</option><option value="18-25">18-25</option><option value="26-30">26-30</option><option value="31-35">31-35</option><option value="36-45">36-45</option><option value="45+">45+</option></select>
+    <select id="countryFilter"><option value="">Country</option><option value="India">India</option><option value="Pakistan">Pakistan</option><option value="Bangladesh">Bangladesh</option><option value="UK">UK</option><option value="USA">USA</option><option value="Canada">Canada</option><option value="UAE">UAE</option><option value="Saudi Arabia">Saudi Arabia</option></select>
+    <button class="action-btn" style="width:auto;padding:8px 24px;" onclick="applyFilters()">🔍 Filter</button>
+  </div>
+  <div id="matchesContainer" class="match-grid"></div>
+</div>
+
+<footer style="background:#0a2e1a; color:rgba(255,255,255,0.6); padding:2rem 0; margin-top:3rem; text-align:center;">
+  <div class="container"><p style="font-size:0.85rem;">☪ MuslimForever — Where Faith Meets Forever</p></div>
+</footer>
+
+<script>
+  document.getElementById('menuIcon')?.addEventListener('click', () => { document.getElementById('navLinks').classList.toggle('active'); });
+  document.getElementById('darkModeToggle')?.addEventListener('click', () => { document.body.classList.toggle('dark'); });
+
+  async function updateNav() {
+    const { data } = await supabaseClient.auth.getUser();
+    const user = data?.user;
+    const loginBtn = document.getElementById('loginNavBtn');
+    const registerBtn = document.getElementById('registerNavBtn');
+    const dashboardBtn = document.getElementById('dashboardNavBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (user) {
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (registerBtn) registerBtn.style.display = 'none';
+      if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
+      if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      logoutBtn.onclick = async (e) => { e.preventDefault(); await supabaseClient.auth.signOut(); window.location.reload(); };
+    } else {
+      if (loginBtn) loginBtn.style.display = 'inline-block';
+      if (registerBtn) registerBtn.style.display = 'inline-block';
+      if (dashboardBtn) dashboardBtn.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+    }
+  }
+  updateNav();
+
+  async function loadMatches(filters = {}) {
+    const container = document.getElementById('matchesContainer');
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#888;">Loading...</div>';
+    try {
+      let query = supabaseClient.from('profiles').select('id, name, age, gender, city, country, religious_practice, occupation, image, approved, is_verified').eq('approved', true).eq('is_verified', true);
+      if (filters.gender) query = query.eq('gender', filters.gender);
+      if (filters.country) query = query.eq('country', filters.country);
+      if (filters.age) {
+        const [min, max] = filters.age.split('-');
+        if (max) { query = query.gte('age', parseInt(min)).lte('age', parseInt(max)); }
+        else { query = query.gte('age', parseInt(min)); }
+      }
+      const { data, error } = await query.order('created_at', { ascending: false }).limit(20);
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#888;">No matches found. Try different filters.</div>`;
+        return;
+      }
+      container.innerHTML = data.map(p => `
+        <div class="match-card">
+          <img src="${p.image || 'https://ui-avatars.com/api/?name='+encodeURIComponent(p.name)+'&background=c8a96e&color=0a2e1a&size=100'}" class="avatar" alt="${p.name}">
+          <div class="name">${p.name}</div>
+          <div class="detail">${p.age || 'N/A'} yrs · ${p.gender === 'male' ? 'Brother' : 'Sister'}</div>
+          <div class="detail">${p.city || ''} ${p.country ? ', '+p.country : ''}</div>
+          <div><span class="badge">${p.religious_practice || 'Muslim'}</span>${p.occupation ? `<span class="badge">${p.occupation}</span>` : ''}</div>
+          <button class="action-btn" onclick="sendInterest('${p.id}')">❤️ Send Interest</button>
+          <button class="action-btn outline" onclick="viewProfile('${p.id}')">👤 View Profile</button>
+        </div>
+      `).join('');
+    } catch (err) {
+      container.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#c0392b;">Error loading matches.</div>`;
+      console.error(err);
+    }
+  }
+
+  window.sendInterest = async (profileId) => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) { alert('Please login to send interest.'); window.location.href = 'login.html'; return; }
+    const { data: existing } = await supabaseClient.from('interests').select('id').eq('sender_id', user.id).eq('receiver_id', profileId).maybeSingle();
+    if (existing) { alert('You already sent interest to this person.'); return; }
+    const { error } = await supabaseClient.from('interests').insert({ sender_id: user.id, receiver_id: profileId, status: 'pending' });
+    if (error) alert('Error: ' + error.message);
+    else alert('✅ Interest sent! May Allah bless your journey.');
+  };
+
+  window.viewProfile = (id) => { window.location.href = `profile.html?id=${id}`; };
+
+  window.applyFilters = () => {
+    const gender = document.getElementById('genderFilter').value;
+    const age = document.getElementById('ageFilter').value;
+    const country = document.getElementById('countryFilter').value;
+    loadMatches({ gender, age, country });
+  };
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const genderParam = urlParams.get('gender');
+  const ageParam = urlParams.get('age');
+  const countryParam = urlParams.get('country');
+  if (genderParam) document.getElementById('genderFilter').value = genderParam;
+  if (ageParam) document.getElementById('ageFilter').value = ageParam;
+  if (countryParam) document.getElementById('countryFilter').value = countryParam;
+  loadMatches({ gender: genderParam, age: ageParam, country: countryParam });
+
+  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('active');
+  }));
+</script>
+</body>
+</html>

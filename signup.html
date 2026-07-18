@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register | MuslimForever</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="supabase.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+    body { background: linear-gradient(135deg, #0a2e1a 0%, #1a5c3a 50%, #0d4028 100%); min-height:100vh; padding:40px 20px; margin:0; }
+    .register-wrapper { max-width:520px; margin:0 auto; }
+    .register-card { background:white; border-radius:24px; padding:2.5rem; box-shadow:0 20px 60px rgba(0,0,0,0.4); }
+    body.dark .register-card { background:#1a2533; }
+    .register-card .logo { text-align:center; font-size:1.6rem; font-weight:800; color:#1a5c3a; }
+    body.dark .register-card .logo { color:#c8a96e; }
+    .register-card .logo .star { color:#c8a96e; }
+    .register-card .subtitle { text-align:center; color:#888; font-size:0.95rem; margin-bottom:0.5rem; }
+    body.dark .register-card .subtitle { color:#aaa; }
+    .dua-divider { text-align:center; color:#c8a96e; font-size:1.5rem; margin:0.5rem 0 1.5rem 0; font-family:'Amiri','Times New Roman',serif; }
+    .form-group { margin-bottom:1rem; }
+    .form-group label { display:block; font-weight:600; font-size:0.85rem; color:#555; margin-bottom:4px; }
+    body.dark .form-group label { color:#aaa; }
+    .form-group input, .form-group select, .form-group textarea { width:100%; padding:10px 14px; border:2px solid #e0e0e0; border-radius:12px; font-size:0.95rem; transition:0.2s; background:white; color:#333; box-sizing:border-box; font-family:inherit; }
+    body.dark .form-group input, body.dark .form-group select, body.dark .form-group textarea { background:#2a3545; border-color:#3d4a5a; color:white; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline:none; border-color:#1a5c3a; box-shadow:0 0 0 3px rgba(26,92,58,0.1); }
+    body.dark .form-group input:focus, body.dark .form-group select:focus, body.dark .form-group textarea:focus { border-color:#c8a96e; box-shadow:0 0 0 3px rgba(200,169,110,0.1); }
+    .form-group textarea { resize:vertical; min-height:80px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .terms-check { display:flex; align-items:center; gap:10px; margin:1rem 0; color:#888; font-size:0.85rem; }
+    body.dark .terms-check { color:#aaa; }
+    .terms-check input[type="checkbox"] { width:18px; height:18px; cursor:pointer; accent-color:#1a5c3a; }
+    body.dark .terms-check input[type="checkbox"] { accent-color:#c8a96e; }
+    .terms-check a { color:#1a5c3a; text-decoration:none; font-weight:600; }
+    body.dark .terms-check a { color:#c8a96e; }
+    .terms-check a:hover { text-decoration:underline; }
+    .btn-register { width:100%; padding:14px; background:#1a5c3a; color:white; border:none; border-radius:12px; font-size:1.05rem; font-weight:700; cursor:pointer; transition:0.3s; margin-top:0.5rem; }
+    body.dark .btn-register { background:#c8a96e; color:#1a1a2e; }
+    .btn-register:hover { transform:scale(1.02); box-shadow:0 8px 25px rgba(26,92,58,0.3); }
+    body.dark .btn-register:hover { box-shadow:0 8px 25px rgba(200,169,110,0.3); }
+    .btn-register:disabled { opacity:0.7; cursor:not-allowed; transform:none; }
+    .login-link { text-align:center; margin-top:1.5rem; color:#888; font-size:0.95rem; }
+    body.dark .login-link { color:#aaa; }
+    .login-link a { color:#1a5c3a; text-decoration:none; font-weight:600; }
+    body.dark .login-link a { color:#c8a96e; }
+    .login-link a:hover { text-decoration:underline; }
+    .error-message { background:#fee2e2; color:#dc2626; padding:10px 14px; border-radius:10px; font-size:0.85rem; margin-bottom:1rem; display:none; }
+    body.dark .error-message { background:#2d1a1a; color:#f87171; }
+    .success-message { background:#dcfce7; color:#16a34a; padding:10px 14px; border-radius:10px; font-size:0.85rem; margin-bottom:1rem; display:none; }
+    body.dark .success-message { background:#1a2d1a; color:#4ade80; }
+    .back-home { text-align:center; margin-top:1rem; font-size:0.85rem; }
+    .back-home a { color:#888; text-decoration:none; }
+    body.dark .back-home a { color:#666; }
+    .back-home a:hover { color:#1a5c3a; }
+    body.dark .back-home a:hover { color:#c8a96e; }
+    @media (max-width:600px) { .form-row { grid-template-columns:1fr; gap:0; } .register-card { padding:1.5rem; } .register-card .logo { font-size:1.3rem; } }
+  </style>
+</head>
+<body>
+<div class="register-wrapper">
+  <div class="register-card">
+    <div class="logo"><span class="star">☪</span> MuslimForever</div>
+    <p class="subtitle">Begin your journey to find your perfect match</p>
+    <div class="dua-divider">ﷺ</div>
+    <div id="errorMessage" class="error-message"></div>
+    <div id="successMessage" class="success-message"></div>
+    <form id="signupForm">
+      <div class="form-group"><label>Full Name *</label><input type="text" id="fullname" placeholder="Enter your full name" required></div>
+      <div class="form-group"><label>Email Address *</label><input type="email" id="email" placeholder="Enter your email" required></div>
+      <div class="form-row">
+        <div class="form-group"><label>Password *</label><input type="password" id="password" placeholder="Min 6 characters" required minlength="6"></div>
+        <div class="form-group"><label>Confirm Password *</label><input type="password" id="confirmPassword" placeholder="Re-enter password" required></div>
+      </div>
+      <div class="form-group"><label>I am a *</label><select id="gender" required><option value="">Select</option><option value="male">Brother (Male)</option><option value="female">Sister (Female)</option></select></div>
+      <div class="form-group"><label>Date of Birth *</label><input type="date" id="dob" required></div>
+      <div class="form-row">
+        <div class="form-group"><label>Country *</label><select id="country" required><option value="">Select Country</option><option value="India">India</option><option value="Pakistan">Pakistan</option><option value="Bangladesh">Bangladesh</option><option value="UK">United Kingdom</option><option value="USA">United States</option><option value="Canada">Canada</option><option value="UAE">UAE</option><option value="Saudi Arabia">Saudi Arabia</option><option value="Other">Other</option></select></div>
+        <div class="form-group"><label>City</label><input type="text" id="city" placeholder="Your city"></div>
+      </div>
+      <div class="form-group"><label>Occupation</label><input type="text" id="occupation" placeholder="Your profession"></div>
+      <div class="form-group"><label>Religious Practice Level</label><select id="religiousPractice"><option value="">Select</option><option value="Very Practicing">Very Practicing</option><option value="Practicing">Practicing</option><option value="Moderate">Moderate</option><option value="Learning">Learning</option></select></div>
+      <div class="form-group"><label>About You</label><textarea id="aboutMe" placeholder="Tell us about yourself, your interests, and what you're looking for..."></textarea></div>
+      <div class="terms-check"><input type="checkbox" id="terms" required><label for="terms">I agree to the <a href="#">Terms & Conditions</a> and confirm this profile is for the purpose of marriage.</label></div>
+      <button type="submit" class="btn-register" id="registerBtn">✋ Register Now</button>
+    </form>
+    <div class="login-link">Already have an account? <a href="login.html">Login here</a></div>
+    <div class="back-home"><a href="index.html">← Back to Home</a></div>
+    <div class="dua-divider" style="margin-top:1rem;font-size:1.2rem;">ﷺ</div>
+  </div>
+</div>
+<script>
+  document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('fullname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const gender = document.getElementById('gender').value;
+    const dob = document.getElementById('dob').value;
+    const country = document.getElementById('country').value;
+    const city = document.getElementById('city').value.trim();
+    const occupation = document.getElementById('occupation').value.trim();
+    const religiousPractice = document.getElementById('religiousPractice').value;
+    const aboutMe = document.getElementById('aboutMe').value.trim();
+    const terms = document.getElementById('terms').checked;
+    const errorDiv = document.getElementById('errorMessage');
+    const successDiv = document.getElementById('successMessage');
+    const registerBtn = document.getElementById('registerBtn');
+    errorDiv.style.display = 'none'; errorDiv.textContent = '';
+    successDiv.style.display = 'none'; successDiv.textContent = '';
+    if (!terms) { errorDiv.textContent = 'Please agree to the Terms & Conditions'; errorDiv.style.display = 'block'; return; }
+    if (password !== confirm) { errorDiv.textContent = 'Passwords do not match!'; errorDiv.style.display = 'block'; return; }
+    if (password.length < 6) { errorDiv.textContent = 'Password must be at least 6 characters'; errorDiv.style.display = 'block'; return; }
+    const birthDate = new Date(dob);
+    const age = Math.floor((new Date() - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
+    if (age < 18) { errorDiv.textContent = 'You must be at least 18 years old to register.'; errorDiv.style.display = 'block'; return; }
+    registerBtn.textContent = '⏳ Creating Account...'; registerBtn.disabled = true;
+    try {
+      const { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
+      if (authError) { errorDiv.textContent = '❌ ' + authError.message; errorDiv.style.display = 'block'; registerBtn.textContent = '✋ Register Now'; registerBtn.disabled = false; return; }
+      if (!authData.user) { errorDiv.textContent = '❌ Registration failed. Please try again.'; errorDiv.style.display = 'block'; registerBtn.textContent = '✋ Register Now'; registerBtn.disabled = false; return; }
+      const slug = name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/--+/g, '-').replace(/^-+|-+$/g, '') + '-' + Date.now();
+      const { error: profileError } = await supabaseClient.from('profiles').insert({
+        user_id: authData.user.id, name, slug, email, gender, age, date_of_birth: dob, country, city: city || null,
+        occupation: occupation || null, about_me: aboutMe || null, religious_practice: religiousPractice || null,
+        approved: false, is_verified: false
+      });
+      if (profileError) {
+        await supabaseClient.auth.admin.deleteUser(authData.user.id);
+        errorDiv.textContent = '❌ Profile creation failed: ' + profileError.message; errorDiv.style.display = 'block';
+        registerBtn.textContent = '✋ Register Now'; registerBtn.disabled = false; return;
+      }
+      successDiv.textContent = '✅ Registration successful! Your profile is pending admin approval.'; successDiv.style.display = 'block';
+      registerBtn.textContent = '✅ Registered!'; registerBtn.style.background = '#16a34a';
+      setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+    } catch (err) {
+      errorDiv.textContent = '❌ An error occurred: ' + err.message; errorDiv.style.display = 'block';
+      registerBtn.textContent = '✋ Register Now'; registerBtn.disabled = false;
+    }
+  });
+  document.getElementById('confirmPassword')?.addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    this.style.borderColor = this.value && this.value !== password ? '#dc2626' : '#e0e0e0';
+  });
+  document.getElementById('password')?.addEventListener('input', function() {
+    const confirm = document.getElementById('confirmPassword');
+    if (confirm.value && confirm.value !== this.value) confirm.style.borderColor = '#dc2626';
+    else if (confirm.value) confirm.style.borderColor = '#16a34a';
+  });
+</script>
+</body>
+</html>

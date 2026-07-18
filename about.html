@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About | MuslimForever</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="supabase.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+    body { background:#f5f0eb; color:#1a1a2e; }
+    body.dark { background:#0f1724; color:#eef2ff; }
+    .container { max-width:900px; margin:0 auto; padding:0 20px; }
+
+    .navbar { background:white; padding:12px 0; box-shadow:0 2px 10px rgba(0,0,0,0.05); position:sticky; top:0; z-index:1000; }
+    body.dark .navbar { background:#1a2533; }
+    .nav-container { display:flex; justify-content:space-between; align-items:center; max-width:1200px; margin:0 auto; padding:0 20px; }
+    .logo { font-size:1.5rem; font-weight:800; color:#1a5c3a; display:flex; align-items:center; gap:8px; text-decoration:none; }
+    body.dark .logo { color:#c8a96e; }
+    .logo .star { color:#c8a96e; }
+    .nav-links { display:flex; gap:1.5rem; align-items:center; flex-wrap:wrap; }
+    .nav-links a { text-decoration:none; color:#333; font-weight:500; transition:0.2s; }
+    body.dark .nav-links a { color:#eef2ff; }
+    .nav-links a:hover { color:#1a5c3a; }
+    body.dark .nav-links a:hover { color:#c8a96e; }
+    .nav-links a.active { color:#1a5c3a; font-weight:700; }
+    body.dark .nav-links a.active { color:#c8a96e; }
+    .nav-btn { padding:8px 20px; border-radius:25px; border:none; font-weight:600; cursor:pointer; transition:0.2s; text-decoration:none; display:inline-block; }
+    .btn-login { background:transparent; color:#1a5c3a; border:2px solid #1a5c3a; }
+    body.dark .btn-login { color:#c8a96e; border-color:#c8a96e; }
+    .btn-login:hover { background:#1a5c3a; color:white; }
+    body.dark .btn-login:hover { background:#c8a96e; color:#1a1a2e; }
+    .btn-register-nav { background:#1a5c3a; color:white; }
+    body.dark .btn-register-nav { background:#c8a96e; color:#1a1a2e; }
+    .btn-register-nav:hover { background:#0d4028; transform:scale(1.02); }
+    body.dark .btn-register-nav:hover { background:#dbb97e; }
+    .btn-dashboard-nav { background:#c8a96e; color:#1a1a2e; }
+    body.dark .btn-dashboard-nav { background:#1a5c3a; color:white; }
+    .btn-dashboard-nav:hover { background:#dbb97e; transform:scale(1.02); }
+    body.dark .btn-dashboard-nav:hover { background:#2a7a4a; }
+    .menu-icon { display:none; font-size:1.5rem; cursor:pointer; color:#333; }
+    body.dark .menu-icon { color:white; }
+
+    .about-card { background:white; border-radius:24px; padding:2.5rem; margin:2rem 0; box-shadow:0 6px 30px rgba(0,0,0,0.05); border:1px solid #eee; }
+    body.dark .about-card { background:#1a2533; border-color:#2d3a4a; }
+    .about-card h1 { font-size:2.5rem; color:#1a5c3a; margin-bottom:1rem; }
+    body.dark .about-card h1 { color:#c8a96e; }
+    .about-card p { line-height:1.8; font-size:1.05rem; color:#555; margin-bottom:1rem; }
+    body.dark .about-card p { color:#ccc; }
+    .about-card .dua { font-family:'Amiri',serif; font-size:1.3rem; color:#1a5c3a; text-align:center; padding:1rem 0; }
+    body.dark .about-card .dua { color:#c8a96e; }
+    .values-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.5rem; margin:2rem 0; }
+    .value-item { background:#f5f0eb; padding:1.5rem; border-radius:16px; text-align:center; }
+    body.dark .value-item { background:#0f1724; }
+    .value-item .icon { font-size:2.5rem; }
+    .value-item h3 { margin:0.5rem 0; }
+
+    @media (max-width:768px) {
+      .nav-links { position:fixed; top:60px; left:-100%; width:100%; background:white; flex-direction:column; padding:2rem; transition:0.3s; box-shadow:0 10px 30px rgba(0,0,0,0.08); gap:1rem; }
+      body.dark .nav-links { background:#1a2533; }
+      .nav-links.active { left:0; }
+      .menu-icon { display:block; }
+      .about-card { padding:1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo"><span class="star">☪</span> MuslimForever</a>
+    <div class="menu-icon" id="menuIcon">☰</div>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="matches.html">Matches</a>
+      <a href="messages.html">Messages</a>
+      <a href="interest.html">Interests</a>
+      <a href="profile.html">Profile</a>
+      <a href="about.html" class="active">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html" id="loginNavBtn" class="nav-btn btn-login">Login</a>
+      <a href="signup.html" id="registerNavBtn" class="nav-btn btn-register-nav">Register</a>
+      <a href="dashboard.html" id="dashboardNavBtn" class="nav-btn btn-dashboard-nav" style="display:none;">Dashboard</a>
+      <a href="#" id="logoutBtn" class="nav-btn btn-login" style="display:none;">Logout</a>
+      <button id="darkModeToggle" class="nav-btn btn-login" style="padding:8px 16px;">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="about-card">
+    <h1>☪ About MuslimForever</h1>
+    <p>MuslimForever is a trusted <strong>halal matrimony platform</strong> designed to help Muslims find their ideal life partner in accordance with Islamic values. We believe that marriage is a sacred bond and a means of completing half of one's faith.</p>
+    <p>Our platform connects <strong>verified Muslim singles</strong> from around the world who are serious about marriage. We prioritize security, confidentiality, and Islamic etiquette in all interactions.</p>
+    <div class="dua">"And among His signs is that He created for you from yourselves mates that you may find tranquility in them; and He placed between you affection and mercy." — Qur'an 30:21</div>
+    <h2 style="margin:2rem 0 1rem;color:#1a5c3a;">Our Core Values</h2>
+    <div class="values-grid">
+      <div class="value-item"><div class="icon">🕌</div><h3>Islamic Principles</h3><p style="font-size:0.85rem;color:#888;">Guided by Qur'an and Sunnah</p></div>
+      <div class="value-item"><div class="icon">🔒</div><h3>Privacy & Security</h3><p style="font-size:0.85rem;color:#888;">Your data is safe with us</p></div>
+      <div class="value-item"><div class="icon">✅</div><h3>Verified Profiles</h3><p style="font-size:0.85rem;color:#888;">Authentic and genuine users</p></div>
+      <div class="value-item"><div class="icon">🤝</div><h3>Halal Matchmaking</h3><p style="font-size:0.85rem;color:#888;">Marriage with barakah</p></div>
+    </div>
+    <p style="margin-top:1.5rem;">Whether you're a brother seeking a pious wife or a sister looking for a righteous husband, MuslimForever is here to help. Join our community today and take the first step towards a blessed marriage.</p>
+  </div>
+</div>
+
+<footer style="background:#0a2e1a; color:rgba(255,255,255,0.6); padding:2rem 0; margin-top:2rem; text-align:center;">
+  <div class="container"><p style="font-size:0.85rem;">☪ MuslimForever — Where Faith Meets Forever</p></div>
+</footer>
+
+<script>
+  document.getElementById('menuIcon')?.addEventListener('click', () => { document.getElementById('navLinks').classList.toggle('active'); });
+  document.getElementById('darkModeToggle')?.addEventListener('click', () => { document.body.classList.toggle('dark'); });
+
+  async function updateNav() {
+    const { data } = await supabaseClient.auth.getUser();
+    const user = data?.user;
+    const loginBtn = document.getElementById('loginNavBtn');
+    const registerBtn = document.getElementById('registerNavBtn');
+    const dashboardBtn = document.getElementById('dashboardNavBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (user) {
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (registerBtn) registerBtn.style.display = 'none';
+      if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
+      if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      logoutBtn.onclick = async (e) => { e.preventDefault(); await supabaseClient.auth.signOut(); window.location.reload(); };
+    } else {
+      if (loginBtn) loginBtn.style.display = 'inline-block';
+      if (registerBtn) registerBtn.style.display = 'inline-block';
+      if (dashboardBtn) dashboardBtn.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+    }
+  }
+  updateNav();
+  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => { document.getElementById('navLinks').classList.remove('active'); }));
+</script>
+</body>
+</html>

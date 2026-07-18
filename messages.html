@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages | MuslimForever</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="supabase.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+    body { background:#f5f0eb; color:#1a1a2e; }
+    body.dark { background:#0f1724; color:#eef2ff; }
+    .container { max-width:900px; margin:0 auto; padding:0 20px; }
+
+    .navbar { background:white; padding:12px 0; box-shadow:0 2px 10px rgba(0,0,0,0.05); position:sticky; top:0; z-index:1000; }
+    body.dark .navbar { background:#1a2533; }
+    .nav-container { display:flex; justify-content:space-between; align-items:center; max-width:1200px; margin:0 auto; padding:0 20px; }
+    .logo { font-size:1.5rem; font-weight:800; color:#1a5c3a; display:flex; align-items:center; gap:8px; text-decoration:none; }
+    body.dark .logo { color:#c8a96e; }
+    .logo .star { color:#c8a96e; }
+    .nav-links { display:flex; gap:1.5rem; align-items:center; flex-wrap:wrap; }
+    .nav-links a { text-decoration:none; color:#333; font-weight:500; transition:0.2s; }
+    body.dark .nav-links a { color:#eef2ff; }
+    .nav-links a:hover { color:#1a5c3a; }
+    body.dark .nav-links a:hover { color:#c8a96e; }
+    .nav-links a.active { color:#1a5c3a; font-weight:700; }
+    body.dark .nav-links a.active { color:#c8a96e; }
+    .nav-btn { padding:8px 20px; border-radius:25px; border:none; font-weight:600; cursor:pointer; transition:0.2s; text-decoration:none; display:inline-block; }
+    .btn-login { background:transparent; color:#1a5c3a; border:2px solid #1a5c3a; }
+    body.dark .btn-login { color:#c8a96e; border-color:#c8a96e; }
+    .btn-login:hover { background:#1a5c3a; color:white; }
+    body.dark .btn-login:hover { background:#c8a96e; color:#1a1a2e; }
+    .btn-register-nav { background:#1a5c3a; color:white; }
+    body.dark .btn-register-nav { background:#c8a96e; color:#1a1a2e; }
+    .btn-register-nav:hover { background:#0d4028; transform:scale(1.02); }
+    body.dark .btn-register-nav:hover { background:#dbb97e; }
+    .btn-dashboard-nav { background:#c8a96e; color:#1a1a2e; }
+    body.dark .btn-dashboard-nav { background:#1a5c3a; color:white; }
+    .btn-dashboard-nav:hover { background:#dbb97e; transform:scale(1.02); }
+    body.dark .btn-dashboard-nav:hover { background:#2a7a4a; }
+    .menu-icon { display:none; font-size:1.5rem; cursor:pointer; color:#333; }
+    body.dark .menu-icon { color:white; }
+
+    .section-title { text-align:center; font-size:2rem; font-weight:700; margin:2rem 0 1rem; }
+    .section-title .highlight { color:#1a5c3a; }
+    body.dark .section-title .highlight { color:#c8a96e; }
+
+    .conv-item { display:flex; align-items:center; padding:1rem 1.5rem; background:white; border-radius:16px; margin-bottom:0.75rem; cursor:pointer; transition:0.2s; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid #eee; }
+    body.dark .conv-item { background:#1a2533; border-color:#2d3a4a; }
+    .conv-item:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.08); border-color:#c8a96e; }
+    body.dark .conv-item:hover { border-color:#c8a96e; }
+    .conv-item .avatar { width:60px; height:60px; border-radius:50%; object-fit:cover; margin-right:1rem; border:3px solid #c8a96e; flex-shrink:0; }
+    .conv-item .info { flex:1; min-width:0; }
+    .conv-item .name { font-weight:700; font-size:1.1rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .conv-item .last-msg { color:#888; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    body.dark .conv-item .last-msg { color:#aaa; }
+    .conv-item .time { font-size:0.7rem; color:#999; white-space:nowrap; margin-left:0.5rem; flex-shrink:0; }
+    body.dark .conv-item .time { color:#777; }
+    .conv-item .badge-unread { background:#1a5c3a; color:white; border-radius:50%; padding:2px 10px; font-size:0.7rem; font-weight:700; flex-shrink:0; }
+    body.dark .conv-item .badge-unread { background:#c8a96e; color:#1a1a2e; }
+
+    .empty-state { text-align:center; padding:4rem 1rem; background:white; border-radius:24px; border:1px solid #eee; }
+    body.dark .empty-state { background:#1a2533; border-color:#2d3a4a; }
+    .empty-state .big-icon { font-size:4rem; margin-bottom:1rem; }
+    .empty-state h3 { font-size:1.3rem; margin-bottom:0.5rem; }
+    .empty-state p { color:#888; }
+    body.dark .empty-state p { color:#aaa; }
+    .empty-state .btn-start { display:inline-block; margin-top:1rem; padding:12px 30px; background:#1a5c3a; color:white; border:none; border-radius:30px; font-size:1rem; font-weight:600; cursor:pointer; text-decoration:none; transition:0.3s; }
+    body.dark .empty-state .btn-start { background:#c8a96e; color:#1a1a2e; }
+    .empty-state .btn-start:hover { transform:scale(1.02); box-shadow:0 6px 20px rgba(26,92,58,0.3); }
+
+    @media (max-width:768px) {
+      .nav-links { position:fixed; top:60px; left:-100%; width:100%; background:white; flex-direction:column; padding:2rem; transition:0.3s; box-shadow:0 10px 30px rgba(0,0,0,0.08); gap:1rem; }
+      body.dark .nav-links { background:#1a2533; }
+      .nav-links.active { left:0; }
+      .menu-icon { display:block; }
+      .conv-item { padding:0.8rem 1rem; }
+      .conv-item .avatar { width:48px; height:48px; }
+      .conv-item .name { font-size:1rem; }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo"><span class="star">☪</span> MuslimForever</a>
+    <div class="menu-icon" id="menuIcon">☰</div>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="matches.html">Matches</a>
+      <a href="messages.html" class="active">Messages</a>
+      <a href="interest.html">Interests</a>
+      <a href="profile.html">Profile</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html" id="loginNavBtn" class="nav-btn btn-login">Login</a>
+      <a href="signup.html" id="registerNavBtn" class="nav-btn btn-register-nav">Register</a>
+      <a href="dashboard.html" id="dashboardNavBtn" class="nav-btn btn-dashboard-nav" style="display:none;">Dashboard</a>
+      <a href="#" id="logoutBtn" class="nav-btn btn-login" style="display:none;">Logout</a>
+      <button id="darkModeToggle" class="nav-btn btn-login" style="padding:8px 16px;">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <h2 class="section-title">💬 <span class="highlight">Your Conversations</span></h2>
+  <div id="conversationsList"></div>
+</div>
+
+<footer style="background:#0a2e1a; color:rgba(255,255,255,0.6); padding:2rem 0; margin-top:3rem; text-align:center;">
+  <div class="container"><p style="font-size:0.85rem;">☪ MuslimForever — Where Faith Meets Forever</p></div>
+</footer>
+
+<script>
+  document.getElementById('menuIcon')?.addEventListener('click', () => { document.getElementById('navLinks').classList.toggle('active'); });
+  document.getElementById('darkModeToggle')?.addEventListener('click', () => { document.body.classList.toggle('dark'); });
+
+  let currentUser = null;
+
+  async function updateNav() {
+    const { data } = await supabaseClient.auth.getUser();
+    const user = data?.user;
+    currentUser = user;
+    const loginBtn = document.getElementById('loginNavBtn');
+    const registerBtn = document.getElementById('registerNavBtn');
+    const dashboardBtn = document.getElementById('dashboardNavBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (user) {
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (registerBtn) registerBtn.style.display = 'none';
+      if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
+      if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      logoutBtn.onclick = async (e) => { e.preventDefault(); await supabaseClient.auth.signOut(); window.location.reload(); };
+    } else {
+      if (loginBtn) loginBtn.style.display = 'inline-block';
+      if (registerBtn) registerBtn.style.display = 'inline-block';
+      if (dashboardBtn) dashboardBtn.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+    }
+  }
+
+  function getTimeAgo(date) {
+    const now = new Date();
+    const diff = Math.floor((now - new Date(date)) / 1000);
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    if (diff < 172800) return 'Yesterday';
+    return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  async function loadConversations() {
+    const container = document.getElementById('conversationsList');
+    if (!currentUser) {
+      container.innerHTML = `<div class="empty-state"><div class="big-icon">🔒</div><h3>Please Login</h3><p>Login to see your conversations</p><a href="login.html" class="btn-start">🔑 Login Now</a></div>`;
+      return;
+    }
+    try {
+      const { data: messages, error: msgError } = await supabaseClient.from('messages').select('*').or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`).order('created_at', { ascending: false });
+      if (msgError) throw msgError;
+      if (!messages || messages.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="big-icon">📭</div><h3>No Messages Yet</h3><p>Start by sending interest to someone from the Matches page!</p><a href="matches.html" class="btn-start">👀 Find Matches</a></div>`;
+        return;
+      }
+      const userIds = new Set();
+      for (const msg of messages) {
+        if (msg.sender_id !== currentUser.id) userIds.add(msg.sender_id);
+        if (msg.receiver_id !== currentUser.id) userIds.add(msg.receiver_id);
+      }
+      const { data: profiles, error: profError } = await supabaseClient.from('profiles').select('user_id, name, image, gender').in('user_id', Array.from(userIds));
+      if (profError) throw profError;
+      const profileMap = {};
+      if (profiles) { for (const p of profiles) { profileMap[p.user_id] = p; } }
+      const convMap = new Map();
+      for (const msg of messages) {
+        const otherId = msg.sender_id === currentUser.id ? msg.receiver_id : msg.sender_id;
+        if (!convMap.has(otherId)) {
+          const other = profileMap[otherId] || { name: 'Unknown User', image: null, gender: null };
+          convMap.set(otherId, { user: other, lastMsg: msg.content, lastTime: msg.created_at, unread: msg.receiver_id === currentUser.id && !msg.is_read ? 1 : 0 });
+        } else {
+          const existing = convMap.get(otherId);
+          if (new Date(msg.created_at) > new Date(existing.lastTime)) { existing.lastMsg = msg.content; existing.lastTime = msg.created_at; }
+          if (msg.receiver_id === currentUser.id && !msg.is_read) { existing.unread += 1; }
+        }
+      }
+      const sorted = Array.from(convMap.entries()).sort((a, b) => new Date(b[1].lastTime) - new Date(a[1].lastTime));
+      let html = '';
+      for (const [otherId, conv] of sorted) {
+        const other = conv.user;
+        const name = other?.name || 'Unknown User';
+        const img = other?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=c8a96e&color=0a2e1a&size=60`;
+        const lastMsg = conv.lastMsg || '...';
+        const timeAgo = getTimeAgo(conv.lastTime);
+        const unreadBadge = conv.unread > 0 ? `<span class="badge-unread">${conv.unread}</span>` : '';
+        html += `<div class="conv-item" onclick="openChat('${otherId}')"><img src="${img}" class="avatar" alt="${name}"><div class="info"><div class="name">${name} ${unreadBadge}</div><div class="last-msg">${lastMsg.length > 60 ? lastMsg.slice(0,60) + '...' : lastMsg}</div></div><div class="time">${timeAgo}</div></div>`;
+      }
+      container.innerHTML = html;
+    } catch (err) {
+      console.error('Error:', err);
+      container.innerHTML = `<div class="empty-state"><div class="big-icon">⚠️</div><h3>Error Loading Messages</h3><p>${err.message || 'Please try again later.'}</p><button onclick="loadConversations()" class="btn-start" style="margin-top:1rem;">🔄 Retry</button></div>`;
+    }
+  }
+
+  window.openChat = (userId) => { window.location.href = `chat.html?user=${userId}`; };
+
+  function subscribeToMessages() {
+    if (!currentUser) return;
+    const channel = supabaseClient.channel('messages-conversations').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `or(sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id})` }, () => { loadConversations(); }).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `receiver_id.eq.${currentUser.id}` }, () => { loadConversations(); }).subscribe();
+    return channel;
+  }
+
+  async function init() { await updateNav(); await loadConversations(); if (currentUser) { subscribeToMessages(); setInterval(loadConversations, 30000); } }
+  init();
+  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => { document.getElementById('navLinks').classList.remove('active'); }));
+</script>
+</body>
+</html>
