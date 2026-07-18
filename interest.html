@@ -183,33 +183,77 @@
   window.switchTab = (tab) => {
     currentTab = tab;
     document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
-    if (tab === 'received') { document.querySelector('.tabs button:first-child').classList.add('active'); } else { document.querySelector('.tabs button:last-child').classList.add('active'); }
+    if (tab === 'received') { document.querySelector('.tabs button:first-child').classList.add('active'); } 
+    else { document.querySelector('.tabs button:last-child').classList.add('active'); }
     loadInterests();
   };
 
   async function loadInterests() {
     const container = document.getElementById('interestsList');
+    
     if (!currentUser) {
       container.innerHTML = `<div class="empty-state"><div class="big-icon">🔒</div><h3>Please Login</h3><p>Login to see your interests</p><a href="login.html" class="btn-start">🔑 Login Now</a></div>`;
       return;
     }
+
     try {
-      const { data, error } = await supabaseClient.from('interests').select(`*, sender:sender_id(id, name, image, gender, age, country, city), receiver:receiver_id(id, name, image, gender, age, country, city)`).or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`).order('created_at', { ascending: false });
-      if (error) throw error;
-      if (!data || data.length === 0) {
+      // Step 1: Get all interests for this user (NO JOIN)
+      const { data: interests, error: intError } = await supabaseClient
+        .from('interests')
+        .select('*')
+        .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+        .order('created_at', { ascending: false });
+
+      if (intError) throw intError;
+
+      if (!interests || interests.length === 0) {
         container.innerHTML = `<div class="empty-state"><div class="big-icon">💔</div><h3>No Interests Yet</h3><p>${currentTab === 'received' ? 'No one has sent you interest yet.' : 'You haven\'t sent any interest yet.'}</p><a href="matches.html" class="btn-start">👀 Find Matches</a></div>`;
         return;
       }
-      let filtered = data;
-      if (currentTab === 'received') { filtered = data.filter(i => i.receiver_id === currentUser.id); } else { filtered = data.filter(i => i.sender_id === currentUser.id); }
+
+      // Step 2: Get all user IDs from interests
+      const userIds = new Set();
+      for (const int of interests) {
+        if (int.sender_id !== currentUser.id) userIds.add(int.sender_id);
+        if (int.receiver_id !== currentUser.id) userIds.add(int.receiver_id);
+      }
+
+      // Step 3: Get profiles for those users
+      const { data: profiles, error: profError } = await supabaseClient
+        .from('profiles')
+        .select('user_id, name, image, gender, age, country, city')
+        .in('user_id', Array.from(userIds));
+
+      if (profError) throw profError;
+
+      // Step 4: Create profile map
+      const profileMap = {};
+      if (profiles) {
+        for (const p of profiles) {
+          profileMap[p.user_id] = p;
+        }
+      }
+
+      // Step 5: Filter based on tab
+      let filtered = interests;
+      if (currentTab === 'received') {
+        filtered = interests.filter(i => i.receiver_id === currentUser.id);
+      } else {
+        filtered = interests.filter(i => i.sender_id === currentUser.id);
+      }
+
       if (filtered.length === 0) {
         container.innerHTML = `<div class="empty-state"><div class="big-icon">📭</div><h3>No ${currentTab === 'received' ? 'Received' : 'Sent'} Interests</h3><p>${currentTab === 'received' ? 'No one has sent you interest yet.' : 'You haven\'t sent any interest yet.'}</p></div>`;
         return;
       }
+
+      // Step 6: Build HTML
       let html = '';
       for (const interest of filtered) {
         const isReceived = interest.receiver_id === currentUser.id;
-        const other = isReceived ? interest.sender : interest.receiver;
+        const otherId = isReceived ? interest.sender_id : interest.receiver_id;
+        const other = profileMap[otherId] || { name: 'Unknown User', image: null, gender: null, age: null, city: null, country: null };
+        
         const name = other?.name || 'Unknown User';
         const img = other?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=c8a96e&color=0a2e1a&size=50`;
         const gender = other?.gender || '';
@@ -218,48 +262,133 @@
         const location = [other?.city, other?.country].filter(Boolean).join(', ');
         const status = interest.status || 'pending';
         const timeAgo = getTimeAgo(interest.created_at);
-        const statusColors = { pending: 'pending', accepted: 'accepted', rejected: 'rejected' };
+
+        const statusColors = {
+          pending: 'pending',
+          accepted: 'accepted',
+          rejected: 'rejected'
+        };
+
         let actions = '';
         if (isReceived && status === 'pending') {
-          actions = `<button class="btn-sm accept" onclick="respondInterest('${interest.id}','accepted')">✅ Accept</button><button class="btn-sm reject" onclick="respondInterest('${interest.id}','rejected')">❌ Decline</button>`;
+          actions = `
+            <button class="btn-sm accept" onclick="respondInterest('${interest.id}','accepted')">✅ Accept</button>
+            <button class="btn-sm reject" onclick="respondInterest('${interest.id}','rejected')">❌ Decline</button>
+          `;
         } else if (status === 'accepted') {
-          actions = `<button class="btn-sm chat" onclick="openChat('${other?.id}')">💬 Message</button><button class="btn-sm view" onclick="viewProfile('${other?.id}')">👤 View</button>`;
+          actions = `
+            <button class="btn-sm chat" onclick="openChat('${otherId}')">💬 Message</button>
+            <button class="btn-sm view" onclick="viewProfile('${otherId}')">👤 View</button>
+          `;
         } else if (status === 'rejected') {
           actions = `<span style="color:#888;font-size:0.8rem;">Declined</span>`;
         } else if (status === 'pending' && !isReceived) {
           actions = `<span style="color:#888;font-size:0.8rem;">⏳ Waiting for response</span>`;
         }
-        html += `<div class="interest-card"><div class="user-info"><img src="${img}" class="avatar" alt="${name}"><div><div class="name">${name} ${genderLabel ? `(${genderLabel})` : ''}</div><div class="detail">${age ? age + ' years' : ''} ${location ? '• ' + location : ''}</div><div class="detail" style="font-size:0.75rem;color:#999;">${timeAgo}</div></div></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;"><span class="status-badge ${statusColors[status] || 'pending'}">${status.charAt(0).toUpperCase() + status.slice(1)}</span><div class="actions">${actions}</div></div></div>`;
+
+        html += `
+          <div class="interest-card">
+            <div class="user-info">
+              <img src="${img}" class="avatar" alt="${name}">
+              <div>
+                <div class="name">${name} ${genderLabel ? `(${genderLabel})` : ''}</div>
+                <div class="detail">${age ? age + ' years' : ''} ${location ? '• ' + location : ''}</div>
+                <div class="detail" style="font-size:0.75rem;color:#999;">${timeAgo}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+              <span class="status-badge ${statusColors[status] || 'pending'}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+              <div class="actions">${actions}</div>
+            </div>
+          </div>
+        `;
       }
+
       container.innerHTML = html;
+
     } catch (err) {
       console.error('Error:', err);
-      container.innerHTML = `<div class="empty-state"><div class="big-icon">⚠️</div><h3>Error Loading Interests</h3><p>${err.message || 'Please try again later.'}</p><button onclick="loadInterests()" class="btn-sm accept" style="margin-top:1rem;padding:8px 24px;">🔄 Retry</button></div>`;
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="big-icon">⚠️</div>
+          <h3>Error Loading Interests</h3>
+          <p>${err.message || 'Please try again later.'}</p>
+          <button onclick="loadInterests()" class="btn-sm accept" style="margin-top:1rem;padding:8px 24px;">🔄 Retry</button>
+        </div>
+      `;
     }
   }
 
   window.respondInterest = async (interestId, status) => {
     if (!currentUser) { alert('Please login first.'); return; }
     try {
-      const { error } = await supabaseClient.from('interests').update({ status: status }).eq('id', interestId);
+      const { error } = await supabaseClient
+        .from('interests')
+        .update({ status: status })
+        .eq('id', interestId);
+
       if (error) throw error;
+
       alert(status === 'accepted' ? '✅ Interest accepted! You can now chat with this person.' : '❌ Interest declined.');
       loadInterests();
-    } catch (err) { alert('Error: ' + err.message); }
+
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
   };
 
-  window.openChat = (userId) => { if (!userId) return; window.location.href = `chat.html?user=${userId}`; };
-  window.viewProfile = (userId) => { if (!userId) return; window.location.href = `profile.html?user=${userId}`; };
+  window.openChat = (userId) => {
+    if (!userId) return;
+    window.location.href = `chat.html?user=${userId}`;
+  };
 
+  window.viewProfile = (userId) => {
+    if (!userId) return;
+    window.location.href = `profile.html?user=${userId}`;
+  };
+
+  // Real-time subscription
   function subscribeToInterests() {
     if (!currentUser) return;
-    const channel = supabaseClient.channel('interests-channel').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'interests', filter: `receiver_id.eq.${currentUser.id}` }, () => { loadInterests(); }).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'interests', filter: `sender_id.eq.${currentUser.id}` }, () => { loadInterests(); }).subscribe();
+
+    const channel = supabaseClient
+      .channel('interests-channel')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'interests',
+        filter: `receiver_id.eq.${currentUser.id}`
+      }, () => {
+        loadInterests();
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'interests',
+        filter: `or(sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id})`
+      }, () => {
+        loadInterests();
+      })
+      .subscribe();
+
     return channel;
   }
 
-  async function init() { await updateNav(); await loadInterests(); if (currentUser) { subscribeToInterests(); setInterval(loadInterests, 30000); } }
+  // Initialize
+  async function init() {
+    await updateNav();
+    await loadInterests();
+    if (currentUser) {
+      subscribeToInterests();
+      setInterval(loadInterests, 30000);
+    }
+  }
+
   init();
-  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => { document.getElementById('navLinks').classList.remove('active'); }));
+
+  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('active');
+  }));
 </script>
 </body>
 </html>
